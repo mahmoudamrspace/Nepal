@@ -29,6 +29,34 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Email Configuration
+
+This project uses [Resend](https://resend.com) for sending emails. To enable email functionality:
+
+1. Sign up for a free account at [Resend](https://resend.com)
+2. Get your API key from the [Resend dashboard](https://resend.com/api-keys)
+3. Add the following environment variables to your `.env.local` file:
+
+```env
+# Resend Email Service
+RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxxxxx"
+
+# Email Configuration
+# The email address that will send emails (must be verified in Resend)
+FROM_EMAIL="noreply@yourdomain.com"
+
+# The email address that will receive contact form submissions
+TO_EMAIL="contact@yourdomain.com"
+
+# Company Name (used in email templates)
+COMPANY_NAME="Explore Vision Nepal"
+```
+
+4. Verify your domain in Resend (required for production)
+5. For development, you can use Resend's test domain or verify your email address
+
+**Note:** If `RESEND_API_KEY` is not set, the contact form will still work and save submissions to the database, but emails will not be sent. This allows the application to function in development without email configuration.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
