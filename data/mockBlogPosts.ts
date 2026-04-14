@@ -1,75 +1,76 @@
 import { BlogPost } from '@/types';
+import { phAvatar, phGallery, phWide } from '@/data/placeholderMedia';
 
+/** Blog seed — replace placeholder images in admin after upload. */
 export const mockBlogPosts: BlogPost[] = [
   {
     id: '1',
     slug: 'best-time-to-visit-nepal',
     title: 'Best Time to Visit Nepal: A Complete Seasonal Guide',
-    excerpt: 'Discover the perfect time to visit Nepal based on weather, festivals, and trekking conditions. Plan your ideal trip with our comprehensive seasonal guide.',
+    excerpt:
+      'Spring rhododendrons, autumn festivals, monsoon trade-offs — plan around weather, trails, and Dashain & Tihar.',
     content: `
-      <p>Nepal, a landlocked country nestled in the Himalayas, offers breathtaking landscapes, rich culture, and incredible trekking opportunities. However, choosing the right time to visit can significantly impact your experience.</p>
-      
-      <h2>Spring (March to May)</h2>
-      <p>Spring is one of the best times to visit Nepal. The weather is mild, with clear skies and blooming rhododendrons painting the hillsides in vibrant colors. This is the peak season for trekking, especially to Everest Base Camp and Annapurna Circuit.</p>
-      
-      <h2>Summer/Monsoon (June to August)</h2>
-      <p>The monsoon season brings heavy rainfall, making trekking challenging. However, this is the best time to see the lush green landscapes and experience fewer crowds. The rain typically occurs in the afternoons, so mornings are often clear.</p>
-      
-      <h2>Autumn (September to November)</h2>
-      <p>Autumn is considered the best time to visit Nepal. The weather is stable, skies are clear, and the views of the Himalayas are spectacular. This is also when major festivals like Dashain and Tihar occur.</p>
-      
-      <h2>Winter (December to February)</h2>
-      <p>Winter brings cold temperatures, especially at higher altitudes. However, lower regions like Kathmandu and Pokhara remain pleasant. This is a great time for cultural tours and lower-altitude treks.</p>
+      <p>Nepal stretches from steamy Terai jungle to 8,000m peaks; timing shapes everything from Lukla flights to jungle visibility.</p>
+
+      <h2>Spring (March–May)</h2>
+      <p>Warming days, blooming rhododendrons, and strong trekking conditions in Khumbu and Annapurna. Afternoon clouds can build; start early for views.</p>
+
+      <h2>Monsoon (June–August)</h2>
+      <p>Heavy rain makes remote trails slippery and leeches common, but the hills are lush and crowds thin. Rain-shadow areas like Upper Mustang see far less precipitation.</p>
+
+      <h2>Autumn (September–November)</h2>
+      <p>Stable post-monsoon skies, crisp air, and major festivals: <strong>Dashain</strong> and <strong>Tihar</strong> bring family gatherings and street celebrations. Book teahouses and flights early.</p>
+
+      <h2>Winter (December–February)</h2>
+      <p>High passes may close with snow; Kathmandu, Pokhara, Chitwan, and low-altitude culture tours stay pleasant. High camps require warmer sleeping systems.</p>
     `,
-    featuredImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2000',
-    images: [
-      'https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2000',
-      'https://images.unsplash.com/photo-1547036967-23d11aacaee0?q=80&w=2000',
-    ],
+    featuredImage: phWide('Blog: Best time Nepal'),
+    images: [phGallery('Spring trek'), phGallery('Festival Nepal')],
     author: {
       name: 'Sarah Johnson',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200',
+      avatar: phAvatar('SJ'),
       bio: 'Travel writer and Nepal enthusiast with over 10 years of experience exploring the Himalayas.',
     },
     category: 'Travel Tips',
     tags: ['Nepal', 'Travel Guide', 'Weather', 'Trekking'],
     publishedAt: '2024-01-15',
     updatedAt: '2024-01-15',
-    readingTime: 5,
+    readingTime: 6,
     featured: true,
     views: 1250,
+    seoTitle: 'Best Time to Visit Nepal | Seasons & Festivals',
+    seoDescription: 'When to trek, avoid monsoon, and catch Dashain and Tihar in Nepal.',
   },
   {
     id: '2',
     slug: 'nepali-culture-and-traditions',
     title: 'Understanding Nepali Culture and Traditions',
-    excerpt: 'Immerse yourself in the rich cultural heritage of Nepal. Learn about festivals, customs, and traditions that make this country unique.',
+    excerpt:
+      'Ethnic diversity, living heritage in the Kathmandu Valley, and how Hindu & Buddhist practices overlap in daily life.',
     content: `
-      <p>Nepal is a melting pot of cultures, with over 100 ethnic groups and 123 languages. The country's rich cultural heritage is evident in its festivals, architecture, and daily life.</p>
-      
-      <h2>Major Festivals</h2>
-      <p>Nepal celebrates numerous festivals throughout the year. Dashain, the biggest festival, celebrates the victory of good over evil. Tihar, the festival of lights, follows Dashain and honors various animals and deities.</p>
-      
-      <h2>Religious Harmony</h2>
-      <p>Hinduism and Buddhism coexist peacefully in Nepal. You'll find temples and stupas side by side, and many Nepalis practice elements of both religions.</p>
-      
-      <h2>Traditional Architecture</h2>
-      <p>The Kathmandu Valley is home to seven UNESCO World Heritage Sites, showcasing traditional Newari architecture with intricate wood carvings and pagoda-style temples.</p>
+      <p>Over 120 ethnic groups shape Nepal’s languages, dress, and festivals — yet a shared mountain courtesy ties communities together.</p>
+
+      <h2>Festivals you may witness</h2>
+      <p><strong>Dashain</strong> honors the goddess Durga; <strong>Tihar</strong> celebrates crows, dogs, cows, and siblings. <strong>Holi</strong> splashes color across towns each spring.</p>
+
+      <h2>Kathmandu Valley craftsmanship</h2>
+      <p>Newar artisans still carve windows and cast bronzes in Patan and Bhaktapur; support fair-trade workshops when buying souvenirs.</p>
+
+      <h2>Etiquette</h2>
+      <p>Use <em>Namaste</em> with palms together; ask before photographing ceremonies; circle stupas clockwise.</p>
     `,
-    featuredImage: 'https://images.unsplash.com/photo-1678628104334-553f672cd8d5?q=80&w=2000',
-    images: [
-      'https://images.unsplash.com/photo-1678628104334-553f672cd8d5?q=80&w=2000',
-    ],
+    featuredImage: phWide('Blog: Nepali culture'),
+    images: [phGallery('Temple Nepal')],
     author: {
       name: 'Rajesh Thapa',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200',
+      avatar: phAvatar('RT'),
       bio: 'Cultural historian and Nepal native passionate about sharing local traditions.',
     },
     category: 'Culture',
     tags: ['Culture', 'Traditions', 'Festivals', 'Nepal'],
     publishedAt: '2024-01-10',
     updatedAt: '2024-01-10',
-    readingTime: 7,
+    readingTime: 8,
     featured: true,
     views: 980,
   },
@@ -77,62 +78,64 @@ export const mockBlogPosts: BlogPost[] = [
     id: '3',
     slug: 'everest-base-camp-preparation',
     title: 'Complete Guide to Preparing for Everest Base Camp Trek',
-    excerpt: 'Everything you need to know before embarking on the iconic Everest Base Camp trek. From fitness preparation to gear checklist.',
+    excerpt:
+      'Training blocks, gear that actually matters, and how to stack acclimatization days before Gorak Shep.',
     content: `
-      <p>The Everest Base Camp trek is a dream for many adventurers. Proper preparation is key to enjoying this incredible journey.</p>
-      
-      <h2>Physical Preparation</h2>
-      <p>Start training at least 3-4 months before your trek. Focus on cardiovascular fitness, leg strength, and endurance. Regular hiking with a loaded backpack is ideal preparation.</p>
-      
-      <h2>Essential Gear</h2>
-      <p>Invest in quality gear: waterproof jacket, warm layers, good hiking boots, sleeping bag rated for cold temperatures, and trekking poles. Don't forget a first aid kit and water purification tablets.</p>
-      
-      <h2>Altitude Acclimatization</h2>
-      <p>Take your time ascending. The trek includes acclimatization days to help your body adjust to higher altitudes. Stay hydrated and listen to your body.</p>
+      <p>Everest Base Camp (5,364m) is a trekking peak — no climbing ropes — but thin air punishes the underprepared.</p>
+
+      <h2>12-week fitness template</h2>
+      <p>Mix stair training with a weighted pack, long weekend hikes, and zone-2 cardio. Add balance work for uneven moraine.</p>
+
+      <h2>Gear priorities</h2>
+      <p>Waterproof shell, insulated jacket, broken-in boots, sleeping bag rated to roughly −10°C for teahouses, and a headlamp for pre-dawn summit pushes to Kala Patthar.</p>
+
+      <h2>Altitude hygiene</h2>
+      <p>Sleep low when possible, hydrate, avoid alcohol early on, and never mask AMS symptoms — guides are trained to descend if needed.</p>
     `,
-    featuredImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2000',
-    images: [
-      'https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2000',
-      'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?q=80&w=2000',
-    ],
+    featuredImage: phWide('Blog: EBC prep'),
+    images: [phGallery('Trek gear'), phGallery('Mountains')],
     author: {
       name: 'Michael Chen',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200',
+      avatar: phAvatar('MC'),
       bio: 'Experienced mountaineer and trekking guide with 50+ successful EBC treks.',
     },
     category: 'Adventure',
     tags: ['Everest', 'Trekking', 'Adventure', 'Preparation'],
     publishedAt: '2024-01-08',
     updatedAt: '2024-01-08',
-    readingTime: 10,
+    readingTime: 11,
     featured: true,
     views: 2100,
+    seoTitle: 'Everest Base Camp Trek Preparation Guide',
+    seoDescription: 'Fitness, packing list, and altitude tips before trekking to EBC.',
   },
   {
     id: '4',
     slug: 'nepali-cuisine-guide',
-    title: 'A Food Lover\'s Guide to Nepali Cuisine',
-    excerpt: 'Explore the flavors of Nepal through its traditional dishes, street food, and regional specialties.',
+    title: "A Food Lover's Guide to Nepali Cuisine",
+    excerpt:
+      'Dal bhat power 24 hour, momo diplomacy, and where to find Newari feasts in the Valley.',
     content: `
-      <p>Nepali cuisine is a delightful blend of flavors influenced by Tibetan, Indian, and local traditions.</p>
-      
-      <h2>Must-Try Dishes</h2>
-      <p>Dal Bhat, the national dish, consists of lentil soup, rice, and vegetables. Momos, steamed dumplings, are a favorite snack. Thukpa, a hearty noodle soup, is perfect for cold mountain days.</p>
-      
-      <h2>Street Food</h2>
-      <p>Kathmandu's streets are filled with food vendors offering everything from sel roti (sweet rice donuts) to chatpate (spicy snack mix).</p>
+      <p>Nepali plates layer Tibetan, Indian, and indigenous flavors — calories matter at altitude.</p>
+
+      <h2>Staples</h2>
+      <p><strong>Dal bhat</strong> (lentils, rice, pickles, vegetables) refuels trekkers daily. <strong>Momos</strong> come steamed, fried, or jhol-style in soup.</p>
+
+      <h2>Valley specialties</h2>
+      <p>Newari <em>yomari</em>, <em>chatamari</em> rice crepes, and fiery <em>choila</em> buffalo pair with local aila spirit in Bhaktapur tasting menus.</p>
     `,
-    featuredImage: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?q=80&w=2000',
-    images: [],
+    featuredImage: phWide('Blog: Nepali food'),
+    images: [phGallery('Dal bhat')],
     author: {
       name: 'Priya Sharma',
+      avatar: phAvatar('PS'),
       bio: 'Food blogger and culinary enthusiast exploring Asian cuisines.',
     },
     category: 'Food',
     tags: ['Food', 'Cuisine', 'Nepal', 'Culture'],
     publishedAt: '2024-01-05',
     updatedAt: '2024-01-05',
-    readingTime: 6,
+    readingTime: 7,
     featured: false,
     views: 650,
   },
@@ -140,28 +143,29 @@ export const mockBlogPosts: BlogPost[] = [
     id: '5',
     slug: 'pokhara-travel-guide',
     title: 'Pokhara: The Gateway to Adventure',
-    excerpt: 'Discover Pokhara, Nepal\'s adventure capital, known for its stunning lakes, paragliding, and proximity to the Annapurna range.',
+    excerpt:
+      'Paragliding thermals, Phewa reflections of Machhapuchhre, and trailheads for Annapurna Sanctuary.',
     content: `
-      <p>Pokhara, located 200km west of Kathmandu, is a paradise for adventure seekers and nature lovers.</p>
-      
-      <h2>Things to Do</h2>
-      <p>Paragliding over the city offers breathtaking views of the Annapurna range. Boating on Phewa Lake at sunrise is magical. Visit the World Peace Pagoda for panoramic views.</p>
-      
-      <h2>Adventure Activities</h2>
-      <p>From zip-lining to bungee jumping, Pokhara offers numerous adrenaline-pumping activities. It's also the starting point for many treks in the Annapurna region.</p>
+      <p>Pokhara’s lakeside strip balances adventure operators with slow café culture — ideal before or after a trek.</p>
+
+      <h2>Signature activities</h2>
+      <p>Morning paragliding from Sarangkot, ultralight flights, zip-lining, and hiring a boat to the World Peace Pagoda trail.</p>
+
+      <h2>Gateway treks</h2>
+      <p>Ghorepani–Poon Hill, Mardi Himal, and ABC begin nearby; build buffer days for weather delays on mountain roads.</p>
     `,
-    featuredImage: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?q=80&w=2000',
-    images: [],
+    featuredImage: phWide('Blog: Pokhara'),
+    images: [phGallery('Fewa lake')],
     author: {
       name: 'Sarah Johnson',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200',
+      avatar: phAvatar('SJ'),
       bio: 'Travel writer and Nepal enthusiast with over 10 years of experience exploring the Himalayas.',
     },
     category: 'Travel Tips',
     tags: ['Pokhara', 'Adventure', 'Travel', 'Nepal'],
     publishedAt: '2024-01-03',
     updatedAt: '2024-01-03',
-    readingTime: 8,
+    readingTime: 9,
     featured: false,
     views: 890,
   },
@@ -169,29 +173,221 @@ export const mockBlogPosts: BlogPost[] = [
     id: '6',
     slug: 'wildlife-in-chitwan',
     title: 'Wildlife Safari in Chitwan National Park',
-    excerpt: 'Experience the incredible biodiversity of Chitwan National Park, home to rhinos, tigers, and over 500 bird species.',
+    excerpt:
+      'UNESCO Terai wilderness: rhinos, tigers, gharials, and ethical alternatives to elephant-back rides.',
     content: `
-      <p>Chitwan National Park, a UNESCO World Heritage Site, offers one of Asia's best wildlife viewing experiences.</p>
-      
-      <h2>Wildlife Spotting</h2>
-      <p>The park is home to one-horned rhinos, Bengal tigers, sloth bears, and numerous bird species. Early morning and late afternoon are the best times for wildlife viewing.</p>
-      
-      <h2>Activities</h2>
-      <p>Jeep safaris, canoe rides, and jungle walks are popular ways to explore the park. Elephant-back safaris offer a unique perspective.</p>
+      <p>Chitwan’s floodplain forests reward patience — dawn jeep drives and silent canoe drifts reveal different species rhythms.</p>
+
+      <h2>Iconic species</h2>
+      <p>Greater one-horned rhino, Bengal tiger, gharial crocodile, and hundreds of birds including hornbills and storks.</p>
+
+      <h2>Responsible choices</h2>
+      <p>Prioritize jeep, foot, and boat safaris with licensed naturalists; question any operator promising guaranteed cat sightings.</p>
     `,
-    featuredImage: 'https://images.unsplash.com/photo-1527004013197-933c4bb611b3?q=80&w=2000',
-    images: [],
+    featuredImage: phWide('Blog: Chitwan'),
+    images: [phGallery('Jungle safari')],
     author: {
       name: 'David Wilson',
+      avatar: phAvatar('DW'),
       bio: 'Wildlife photographer and conservation advocate.',
     },
     category: 'Adventure',
     tags: ['Wildlife', 'Chitwan', 'Safari', 'Nature'],
     publishedAt: '2024-01-01',
     updatedAt: '2024-01-01',
-    readingTime: 5,
+    readingTime: 6,
     featured: false,
     views: 720,
   },
-];
+  {
+    id: '7',
+    slug: 'nepal-trekking-permits-explained',
+    title: 'Nepal Trekking Permits Explained (TIMS, ACAP, Sagarmatha)',
+    excerpt:
+      'Which paperwork you need for Annapurna, Langtang, and Everest — and why guides matter beyond logistics.',
+    content: `
+      <p>Nepal’s protected areas require permits whose fees fund trail maintenance and conservation rangers.</p>
 
+      <h2>TIMS & route-specific permits</h2>
+      <p>Annapurna Conservation Area (ACAP) and Sagarmatha National Park passes are checked at checkpoints. Langtang National Park issues its own entry ticket.</p>
+
+      <h2>Restricted regions</h2>
+      <p>Upper Mustang, Manaslu, and other border zones need special trekking permits — itineraries must be pre-approved.</p>
+
+      <h2>2020s reforms</h2>
+      <p>Rules evolve; a licensed agency keeps your group compliant if independent TIMS rules change mid-season.</p>
+    `,
+    featuredImage: phWide('Blog: Permits Nepal'),
+    images: [],
+    author: {
+      name: 'Michael Chen',
+      avatar: phAvatar('MC'),
+      bio: 'Experienced mountaineer and trekking guide with 50+ successful EBC treks.',
+    },
+    category: 'Travel Tips',
+    tags: ['Nepal', 'Trekking', 'Permits', 'Travel Guide'],
+    publishedAt: '2023-12-28',
+    updatedAt: '2023-12-28',
+    readingTime: 7,
+    featured: false,
+    views: 1840,
+    seoTitle: 'Nepal Trekking Permits | TIMS ACAP Sagarmatha',
+    seoDescription: 'Permit basics for Annapurna, Everest, and Langtang regions.',
+  },
+  {
+    id: '8',
+    slug: 'responsible-travel-nepal',
+    title: 'Traveling Responsibly in Nepal’s Mountains',
+    excerpt:
+      'Porter weight limits, plastic reduction, and how tipping fairly supports mountain economies.',
+    content: `
+      <p>Responsible travel protects both people and peaks — small choices compound across thousands of trekkers each season.</p>
+
+      <h2>Porters & guides</h2>
+      <p>Insist on fair load weights (often ~20–25kg including porter’s own gear), waterproof duffels, and rest days written into contracts.</p>
+
+      <h2>Waste</h2>
+      <p>Carry a refill bottle with purification; say no to double-bagged snacks; pack out batteries and blister packs.</p>
+
+      <h2>Community</h2>
+      <p>Buy handicrafts direct from cooperatives, learn a few Nepali phrases, and respect photography boundaries in villages.</p>
+    `,
+    featuredImage: phWide('Blog: Responsible travel'),
+    images: [phGallery('Mountain trail')],
+    author: {
+      name: 'Anita Gurung',
+      avatar: phAvatar('AG'),
+      bio: 'Sustainable tourism consultant based in Pokhara; former lodge operator on the ABC trail.',
+    },
+    category: 'Travel Tips',
+    tags: ['Nepal', 'Sustainability', 'Trekking', 'Culture'],
+    publishedAt: '2023-12-22',
+    updatedAt: '2023-12-22',
+    readingTime: 8,
+    featured: true,
+    views: 960,
+  },
+  {
+    id: '9',
+    slug: 'langtang-valley-reborn',
+    title: 'Langtang Valley: Trekking After Rebirth',
+    excerpt:
+      'How the valley recovered after 2015, what you’ll see in Kyanjin, and why Tamang heritage endures.',
+    content: `
+      <p>The 2015 earthquake devastated Langtang village; today teahouses and memorial chortens stand beside replanted forests.</p>
+
+      <h2>Why trek here</h2>
+      <p>No Lukla flight — road access from Kathmandu — yet you still reach glacier views near Kyanjin Gompa within a week on trail.</p>
+
+      <h2>Cultural notes</h2>
+      <p>Tamang communities share Tibetan Buddhist rituals; cheese factories at Kyanjin offer fresh yak curd tastings.</p>
+    `,
+    featuredImage: phWide('Blog: Langtang'),
+    images: [],
+    author: {
+      name: 'Rajesh Thapa',
+      avatar: phAvatar('RT'),
+      bio: 'Cultural historian and Nepal native passionate about sharing local traditions.',
+    },
+    category: 'Adventure',
+    tags: ['Langtang', 'Nepal', 'Trekking', 'Culture'],
+    publishedAt: '2023-12-18',
+    updatedAt: '2023-12-18',
+    readingTime: 6,
+    featured: false,
+    views: 540,
+  },
+  {
+    id: '10',
+    slug: 'annapurna-or-everest-which-trek',
+    title: 'Annapurna Circuit or Everest Base Camp?',
+    excerpt:
+      'Compare altitude profiles, logistics, crowds, and scenery to pick the right first Himalayan trek.',
+    content: `
+      <p>Both routes are world-class — your calendar, budget, and appetite for flying to Lukla usually decide.</p>
+
+      <h2>Logistics</h2>
+      <p>EBC hinges on Kathmandu–Lukla flights (weather delays common). Annapurna often starts with a long jeep ride — more flexible if monsoon lingers.</p>
+
+      <h2>High point</h2>
+      <p>Thorong La on the full circuit reaches 5,416m — higher than EBC — but you can shorten Annapurna with exits to Jomsom.</p>
+
+      <h2>Vibe</h2>
+      <p>EBC feels Sherpa-centric with iconic peak views; Annapurna shifts from subtropical gorges to Mustang-style dryness.</p>
+    `,
+    featuredImage: phWide('Blog: Annapurna vs Everest'),
+    images: [],
+    author: {
+      name: 'Sarah Johnson',
+      avatar: phAvatar('SJ'),
+      bio: 'Travel writer and Nepal enthusiast with over 10 years of experience exploring the Himalayas.',
+    },
+    category: 'Adventure',
+    tags: ['Annapurna', 'Everest', 'Trekking', 'Travel'],
+    publishedAt: '2023-12-12',
+    updatedAt: '2023-12-12',
+    readingTime: 9,
+    featured: false,
+    views: 1420,
+  },
+  {
+    id: '11',
+    slug: 'kathmandu-momo-map',
+    title: 'Where to Eat Momos in Kathmandu (Without the Tourist Trap)',
+    excerpt:
+      'From hole-in-the-wall buff counters to Newari courtyard cafés — a starter list for dumpling lovers.',
+    content: `
+      <p>Momos migrated from Tibet and became Nepal’s national comfort food — steamed, fried, or swimming in jhol soup.</p>
+
+      <h2>What to order</h2>
+      <p>Try <em>kothe</em> (pan-fried bottoms), open-top <em>molmo</em>, and buff (water buffalo) fillings for authentic spice.</p>
+
+      <h2>Neighborhoods</h2>
+      <p>Explore Patan alleys for family kitchens; Thamel has reliable late-night steamers — always ask for freshly made batches.</p>
+    `,
+    featuredImage: phWide('Blog: Momos KTM'),
+    images: [],
+    author: {
+      name: 'Priya Sharma',
+      avatar: phAvatar('PS'),
+      bio: 'Food blogger and culinary enthusiast exploring Asian cuisines.',
+    },
+    category: 'Food',
+    tags: ['Food', 'Kathmandu', 'Nepal', 'Cuisine'],
+    publishedAt: '2023-12-08',
+    updatedAt: '2023-12-08',
+    readingTime: 5,
+    featured: false,
+    views: 2100,
+  },
+  {
+    id: '12',
+    slug: 'lumbini-pilgrimage-first-timers',
+    title: 'Lumbini for First-Time Pilgrims',
+    excerpt:
+      'Maya Devi Temple etiquette, cycling the monastic zone, and pairing Lumbini with Chitwan.',
+    content: `
+      <p>UNESCO-listed Lumbini blends archaeology with living practice — allow two full days minimum in the sacred garden.</p>
+
+      <h2>Sacred garden</h2>
+      <p>Remove shoes before Maya Devi Temple; speak quietly around the marker stone; photograph exteriors respectfully.</p>
+
+      <h2>Monastic architecture</h2>
+      <p>Rent a bicycle to compare Thai, Chinese, and German monasteries — each compound reflects its sponsor nation’s style.</p>
+    `,
+    featuredImage: phWide('Blog: Lumbini'),
+    images: [],
+    author: {
+      name: 'David Wilson',
+      avatar: phAvatar('DW'),
+      bio: 'Wildlife photographer and conservation advocate.',
+    },
+    category: 'Culture',
+    tags: ['Lumbini', 'Pilgrimage', 'Nepal', 'Spiritual Travel'],
+    publishedAt: '2023-12-04',
+    updatedAt: '2023-12-04',
+    readingTime: 6,
+    featured: false,
+    views: 430,
+  },
+];

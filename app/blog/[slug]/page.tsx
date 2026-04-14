@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -9,22 +10,38 @@ import TagList from '@/components/blog/TagList';
 import RelatedPosts from '@/components/blog/RelatedPosts';
 import PostNavigation from '@/components/blog/PostNavigation';
 import ReadingProgress from '@/components/blog/ReadingProgress';
-import Link from 'next/link';
 import { BlogPost } from '@/types';
+import { createAnonClient } from '@/lib/supabase/anon';
+import {
+  fetchBlogPostPublishedBySlug,
+  fetchBlogPostsPublished,
+  fetchPublishedBlogSlugs,
+} from '@/lib/supabase/queries';
+import { absoluteUrl, getSiteUrl } from '@/lib/siteUrl';
+
+export const revalidate = 3600;
+
+function toBlogPost(post: Record<string, unknown>): BlogPost {
+  const rawTags = (post.tags as { name?: string }[] | undefined) ?? [];
+  return {
+    ...post,
+    tags: rawTags.map((t) => t.name || String(t)),
+  } as BlogPost;
+}
 
 async function getPost(slug: string): Promise<BlogPost | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/blog/${slug}`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return null;
-    const post = await res.json();
-    // Transform the post to match BlogPost type
-    return {
-      ...post,
-      tags: post.tags?.map((t: any) => t.name || t) || [],
-    };
+    const supabase = createAnonClient();
+    const { post, error } = await fetchBlogPostPublishedBySlug(supabase, slug);
+    if (error || !post) return null;
+    void (async () => {
+      try {
+        await supabase.rpc('increment_post_views', { p_slug: slug });
+      } catch {
+        /* ignore view counter failures */
+      }
+    })();
+    return toBlogPost(post as Record<string, unknown>);
   } catch (error) {
     console.error('Failed to fetch blog post:', error);
     return null;
@@ -33,19 +50,68 @@ async function getPost(slug: string): Promise<BlogPost | null> {
 
 async function getAllPosts(): Promise<BlogPost[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/blog`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
-    const posts = await res.json();
-    return posts.map((post: any) => ({
-      ...post,
-      tags: post.tags?.map((t: any) => t.name || t) || [],
-    }));
+    const supabase = createAnonClient();
+    const { posts, error } = await fetchBlogPostsPublished(supabase, {});
+    if (error || !posts?.length) return [];
+    return posts.map((p) => toBlogPost(p as Record<string, unknown>));
   } catch (error) {
     console.error('Failed to fetch blog posts:', error);
     return [];
+  }
+}
+
+export async function generateStaticParams() {
+  try {
+    const supabase = createAnonClient();
+    const { slugs, error } = await fetchPublishedBlogSlugs(supabase);
+    if (error || !slugs?.length) return [];
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const site = getSiteUrl();
+  const canonical = `${site}/blog/${slug}`;
+
+  try {
+    const supabase = createAnonClient();
+    const { post, error } = await fetchBlogPostPublishedBySlug(supabase, slug);
+    if (error || !post) {
+      return { title: 'Blog', alternates: { canonical } };
+    }
+    const p = toBlogPost(post as Record<string, unknown>);
+    const title = `${p.title} | Nepal Travel Blog`;
+    const description = p.excerpt?.slice(0, 160) ?? p.title;
+    const ogImage = p.featuredImage || p.images?.[0];
+    return {
+      title,
+      description,
+      alternates: { canonical },
+      openGraph: {
+        title,
+        description,
+        url: canonical,
+        type: 'article',
+        publishedTime: p.publishedAt,
+        modifiedTime: p.updatedAt,
+        ...(ogImage ? { images: [{ url: absoluteUrl(ogImage), alt: p.title }] } : {}),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        ...(ogImage ? { images: [absoluteUrl(ogImage)] } : {}),
+      },
+    };
+  } catch {
+    return { title: 'Blog', alternates: { canonical } };
   }
 }
 
@@ -58,12 +124,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   const allPosts = await getAllPosts();
-  const currentIndex = allPosts.findIndex(p => p.id === post.id);
+  const currentIndex = allPosts.findIndex((p) => p.id === post.id);
   const previousPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
   const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const postUrl = `${baseUrl}/blog/${post.slug}`;
+  const postUrl = `${getSiteUrl()}/blog/${post.slug}`;
 
   return (
     <>
@@ -115,4 +180,3 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     </>
   );
 }
-

@@ -1,18 +1,31 @@
 /**
  * Seed Supabase after running supabase/migrations/20250408000000_initial_schema.sql
  * Env: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+ *
+ * `tsx` does not load `.env` (Next.js does). Load it here so `npm run db:seed` works.
  */
-import { createClient } from '@supabase/supabase-js';
+import 'dotenv/config';
+
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+
+/** Untyped DB shape — avoids `never` inserts on junction tables without generated types. */
+type SeedClient = SupabaseClient;
 import { mockPackages } from '../data/mockPackages';
 import { mockBlogPosts } from '../data/mockBlogPosts';
 import { mockReviews } from '../data/mockReviews';
+import {
+  PACKAGE_TAG_NAMES_BY_SLUG,
+  SEED_BOOKINGS,
+  SEED_CONTACT_SUBMISSIONS,
+  SEED_NEWSLETTER_EMAILS,
+} from '../data/supabaseSeedExtras';
 
 function rid() {
   return crypto.randomUUID();
 }
 
 async function setBlogTags(
-  admin: ReturnType<typeof createClient>,
+  admin: SeedClient,
   postId: string,
   tagNames: string[],
   tagMap: Map<string, string>
@@ -26,6 +39,25 @@ async function setBlogTags(
     .filter(Boolean) as { A: string; B: string }[];
   if (rows.length) {
     const { error } = await admin.from('_BlogPostToTag').insert(rows);
+    if (error) throw error;
+  }
+}
+
+async function setPackageTags(
+  admin: SeedClient,
+  packageId: string,
+  tagNames: string[],
+  tagMap: Map<string, string>
+) {
+  await admin.from('_PackageToTag').delete().eq('A', packageId);
+  const rows = tagNames
+    .map((name) => {
+      const B = tagMap.get(name);
+      return B ? { A: packageId, B } : null;
+    })
+    .filter(Boolean) as { A: string; B: string }[];
+  if (rows.length) {
+    const { error } = await admin.from('_PackageToTag').insert(rows);
     if (error) throw error;
   }
 }
@@ -108,6 +140,9 @@ async function main() {
   const tagMap = new Map<string, string>();
   const allTags = new Set<string>();
   mockBlogPosts.forEach((post) => post.tags.forEach((tag) => allTags.add(tag)));
+  Object.values(PACKAGE_TAG_NAMES_BY_SLUG).forEach((names) =>
+    names.forEach((tag) => allTags.add(tag))
+  );
 
   for (const tagName of allTags) {
     const slug = tagName.toLowerCase().replace(/\s+/g, '-');
@@ -175,6 +210,99 @@ async function main() {
     const { error } = await admin.from('packages').upsert(row, { onConflict: 'slug' });
     if (error) throw error;
     console.log('✅ Package:', pkg.name);
+  }
+
+  const { data: packageRows, error: pkgListErr } = await admin.from('packages').select('id, slug');
+  if (pkgListErr) throw pkgListErr;
+  const slugToPackageId = new Map((packageRows ?? []).map((p) => [p.slug as string, p.id as string]));
+
+  for (const [slug, tagNames] of Object.entries(PACKAGE_TAG_NAMES_BY_SLUG)) {
+    const packageId = slugToPackageId.get(slug);
+    if (!packageId) {
+      console.warn('⚠️ No package for slug, skipping tags:', slug);
+      continue;
+    }
+    await setPackageTags(admin, packageId, tagNames, tagMap);
+    console.log('✅ Package tags:', slug);
+  }
+
+  for (const b of SEED_BOOKINGS) {
+    const packageId = slugToPackageId.get(b.packageSlug);
+    if (!packageId) {
+      console.warn('⚠️ Booking skipped — unknown package slug:', b.packageSlug);
+      continue;
+    }
+    const { data: existingBooking } = await admin
+      .from('bookings')
+      .select('id')
+      .eq('bookingNumber', b.bookingNumber)
+      .maybeSingle();
+    const bookingId = existingBooking?.id ?? rid();
+    const row = {
+      id: bookingId,
+      bookingNumber: b.bookingNumber,
+      packageId,
+      travelers: b.travelers,
+      selectedDate: b.selectedDate,
+      numberOfTravelers: b.numberOfTravelers,
+      basePrice: b.basePrice,
+      taxes: b.taxes,
+      fees: b.fees,
+      totalPrice: b.totalPrice,
+      currency: b.currency ?? 'USD',
+      status: b.status,
+      paymentStatus: b.paymentStatus,
+      paymentMethod: b.paymentMethod,
+      customerEmail: b.customerEmail,
+      customerPhone: b.customerPhone,
+      specialRequests: b.specialRequests ?? null,
+      emergencyContact: b.emergencyContact ?? null,
+      updatedAt: new Date().toISOString(),
+    };
+    const { error } = await admin.from('bookings').upsert(row, { onConflict: 'bookingNumber' });
+    if (error) throw error;
+    console.log('✅ Booking:', b.bookingNumber);
+  }
+
+  for (const c of SEED_CONTACT_SUBMISSIONS) {
+    const { error } = await admin.from('contact_submissions').upsert(
+      {
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        subject: c.subject,
+        message: c.message,
+        read: false,
+      },
+      { onConflict: 'id' }
+    );
+    if (error) throw error;
+    console.log('✅ Contact:', c.email);
+  }
+
+  for (const sub of SEED_NEWSLETTER_EMAILS) {
+    const { data: existing } = await admin
+      .from('newsletter_subscribers')
+      .select('id, subscribedAt')
+      .eq('email', sub.email)
+      .maybeSingle();
+    const id = existing?.id ?? rid();
+    const subscribedAt =
+      existing && typeof existing.subscribedAt === 'string'
+        ? existing.subscribedAt
+        : new Date().toISOString();
+    const { error } = await admin.from('newsletter_subscribers').upsert(
+      {
+        id,
+        email: sub.email,
+        active: sub.active,
+        subscribedAt,
+      },
+      { onConflict: 'email' }
+    );
+    if (error) throw error;
+    console.log('✅ Newsletter:', sub.email);
   }
 
   const { data: existingReviews } = await admin.from('reviews').select('id');

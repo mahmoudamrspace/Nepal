@@ -3,15 +3,21 @@ import Link from 'next/link';
 import PackageCard from '../packages/PackageCard';
 import PackageCardSkeleton from '../ui/PackageCardSkeleton';
 import type { Package } from '@/types';
+import { createAnonClient } from '@/lib/supabase/anon';
+import { fetchPackages } from '@/lib/supabase/queries';
 
-async function getFeaturedPackages() {
+function rowToPackage(row: Record<string, unknown>): Package {
+  const copy = { ...row };
+  delete copy.tags;
+  return copy as unknown as Package;
+}
+
+async function getFeaturedPackages(): Promise<Package[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/packages?featured=true`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
-    if (!res.ok) return [];
-    const packages = await res.json();
-    return packages.slice(0, 3);
+    const supabase = createAnonClient();
+    const { packages, error } = await fetchPackages(supabase, { featured: true });
+    if (error || !packages?.length) return [];
+    return packages.slice(0, 3).map((p) => rowToPackage(p as Record<string, unknown>));
   } catch (error) {
     console.error('Failed to fetch featured packages:', error);
     return [];
@@ -33,11 +39,15 @@ export default async function FeaturedPackages() {
           </p>
         </div>
 
-        <Suspense fallback={
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-            {[1, 2, 3].map((i) => <PackageCardSkeleton key={i} />)}
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+              {[1, 2, 3].map((i) => (
+                <PackageCardSkeleton key={i} />
+              ))}
+            </div>
+          }
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
             {featuredPackages.map((pkg: Package, index: number) => (
               <PackageCard key={pkg.id} package={pkg} index={index} />
@@ -58,4 +68,3 @@ export default async function FeaturedPackages() {
     </section>
   );
 }
-

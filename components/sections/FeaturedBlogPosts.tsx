@@ -3,15 +3,23 @@ import Link from 'next/link';
 import BlogCard from '../blog/BlogCard';
 import BlogCardSkeleton from '../ui/BlogCardSkeleton';
 import type { BlogPost } from '@/types';
+import { createAnonClient } from '@/lib/supabase/anon';
+import { fetchBlogPostsPublished } from '@/lib/supabase/queries';
 
-async function getFeaturedPosts() {
+function toBlogPost(post: Record<string, unknown>): BlogPost {
+  const rawTags = (post.tags as { name?: string }[] | undefined) ?? [];
+  return {
+    ...post,
+    tags: rawTags.map((t) => t.name || String(t)),
+  } as BlogPost;
+}
+
+async function getFeaturedPosts(): Promise<BlogPost[]> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/blog?featured=true`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
-    if (!res.ok) return [];
-    const posts = await res.json();
-    return posts.slice(0, 3);
+    const supabase = createAnonClient();
+    const { posts, error } = await fetchBlogPostsPublished(supabase, { featured: true });
+    if (error || !posts?.length) return [];
+    return posts.slice(0, 3).map((p) => toBlogPost(p as Record<string, unknown>));
   } catch (error) {
     console.error('Failed to fetch featured posts:', error);
     return [];
@@ -33,11 +41,15 @@ export default async function FeaturedBlogPosts() {
           </p>
         </div>
 
-        <Suspense fallback={
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-            {[1, 2, 3].map((i) => <BlogCardSkeleton key={i} />)}
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+              {[1, 2, 3].map((i) => (
+                <BlogCardSkeleton key={i} />
+              ))}
+            </div>
+          }
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
             {featuredPosts.map((post: BlogPost, index: number) => (
               <BlogCard key={post.id} post={post} index={index} />
@@ -58,4 +70,3 @@ export default async function FeaturedBlogPosts() {
     </section>
   );
 }
-

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -8,33 +9,93 @@ import FAQAccordion from '@/components/packages/FAQAccordion';
 import BookingBar from '@/components/packages/BookingBar';
 import RelatedPackages from '@/components/packages/RelatedPackages';
 import Link from 'next/link';
-import { Package } from '@/types';
+import type { FAQ, ItineraryDay, Package } from '@/types';
+import { createAnonClient } from '@/lib/supabase/anon';
+import { fetchPackageBySlug, fetchPackages, fetchPackageSlugs } from '@/lib/supabase/queries';
+import { absoluteUrl, getSiteUrl } from '@/lib/siteUrl';
+
+export const revalidate = 3600;
+
+function rowToPackage(row: Record<string, unknown>): Package {
+  const copy = { ...row };
+  delete copy.tags;
+  return copy as unknown as Package;
+}
 
 async function getPackage(slug: string): Promise<Package | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/packages/${slug}`, {
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch (error) {
-    console.error('Failed to fetch package:', error);
+    const supabase = createAnonClient();
+    const { package: row, error } = await fetchPackageBySlug(supabase, slug);
+    if (error || !row) return null;
+    return rowToPackage(row as Record<string, unknown>);
+  } catch (e) {
+    console.error('Failed to fetch package:', e);
     return null;
   }
 }
 
 async function getAllPackages(): Promise<Package[]> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/packages`, {
-      next: { revalidate: 3600 },
-    });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch (error) {
-    console.error('Failed to fetch packages:', error);
+    const supabase = createAnonClient();
+    const { packages, error } = await fetchPackages(supabase, {});
+    if (error || !packages?.length) return [];
+    return packages.map((p) => rowToPackage(p as Record<string, unknown>));
+  } catch (e) {
+    console.error('Failed to fetch packages:', e);
     return [];
+  }
+}
+
+export async function generateStaticParams() {
+  try {
+    const supabase = createAnonClient();
+    const { slugs, error } = await fetchPackageSlugs(supabase);
+    if (error || !slugs?.length) return [];
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const site = getSiteUrl();
+  const canonical = `${site}/packages/${slug}`;
+
+  try {
+    const supabase = createAnonClient();
+    const { package: row, error } = await fetchPackageBySlug(supabase, slug);
+    if (error || !row) {
+      return { title: 'Package', alternates: { canonical } };
+    }
+    const pkg = rowToPackage(row as Record<string, unknown>);
+    const title = `${pkg.name} | Nepal Tours`;
+    const description = pkg.shortDescription?.slice(0, 160) ?? pkg.name;
+    const ogImage = pkg.featuredImage || pkg.images?.[0];
+    return {
+      title,
+      description,
+      alternates: { canonical },
+      openGraph: {
+        title,
+        description,
+        url: canonical,
+        type: 'website',
+        ...(ogImage ? { images: [{ url: absoluteUrl(ogImage), alt: pkg.name }] } : {}),
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title,
+        description,
+        ...(ogImage ? { images: [absoluteUrl(ogImage)] } : {}),
+      },
+    };
+  } catch {
+    return { title: 'Package', alternates: { canonical } };
   }
 }
 
@@ -114,7 +175,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                 <div className="bg-white rounded-lg p-8 md:p-10 card-shadow">
                   <h2 className="text-3xl md:text-4xl font-serif text-[#2d2d2d] mb-6 md:mb-8">Overview</h2>
                   <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-8 md:mb-10">{pkg.fullDescription}</p>
-                  
+
                   {/* Highlights */}
                   <div className="bg-[#dbe2dd] rounded-lg p-6 md:p-8">
                     <h3 className="text-xl md:text-2xl font-serif text-[#2d2d2d] mb-4 md:mb-6">Highlights</h3>
@@ -134,12 +195,12 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                 {/* Itinerary */}
                 <div className="bg-white rounded-lg p-8 md:p-10 card-shadow">
                   <h2 className="text-3xl md:text-4xl font-serif text-[#2d2d2d] mb-6 md:mb-8">Itinerary</h2>
-                  <ItineraryAccordion itinerary={pkg.itinerary as any} />
+                  <ItineraryAccordion itinerary={pkg.itinerary as ItineraryDay[]} />
                 </div>
 
                 {/* Included/Excluded */}
                 <div className="bg-white rounded-lg p-8 md:p-10 card-shadow">
-                  <h2 className="text-3xl md:text-4xl font-serif text-[#2d2d2d] mb-6 md:mb-8">What's Included & Excluded</h2>
+                  <h2 className="text-3xl md:text-4xl font-serif text-[#2d2d2d] mb-6 md:mb-8">What&apos;s Included & Excluded</h2>
                   <IncludedExcluded included={pkg.included} excluded={pkg.excluded} />
                 </div>
 
@@ -147,7 +208,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                 {pkg.faq && Array.isArray(pkg.faq) && pkg.faq.length > 0 && (
                   <div className="bg-white rounded-lg p-8 md:p-10 card-shadow">
                     <h2 className="text-3xl md:text-4xl font-serif text-[#2d2d2d] mb-6 md:mb-8">Frequently Asked Questions</h2>
-                    <FAQAccordion faq={pkg.faq as any} />
+                    <FAQAccordion faq={pkg.faq as FAQ[]} />
                   </div>
                 )}
               </div>
@@ -181,19 +242,13 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
                     </div>
                   </div>
 
-                  <Link 
-                    href={`/checkout?package=${pkg.slug}`}
-                    className="block w-full mb-4"
-                  >
+                  <Link href={`/checkout?package=${pkg.slug}`} className="block w-full mb-4">
                     <button className="w-full px-6 py-4 bg-[#485342] text-white rounded-full font-semibold uppercase tracking-wide hover:bg-[#3a4235] transition-all duration-300 button-shadow focus:outline-none focus:ring-4 focus:ring-[#485342]/50">
                       Book Now
                     </button>
                   </Link>
 
-                  <Link
-                    href="/contact"
-                    className="block w-full"
-                  >
+                  <Link href="/contact" className="block w-full">
                     <button className="w-full px-6 py-3 border-2 border-[#485342] text-[#485342] rounded-full font-semibold uppercase tracking-wide hover:bg-[#485342] hover:text-white transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#485342]/50">
                       Contact Us
                     </button>
@@ -220,4 +275,3 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
     </>
   );
 }
-

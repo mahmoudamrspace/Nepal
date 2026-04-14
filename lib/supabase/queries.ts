@@ -112,6 +112,21 @@ export async function fetchPackageBySlug(supabase: SupabaseClient, slug: string)
   return { package: withTags, error: null };
 }
 
+export async function fetchPackageSlugs(supabase: SupabaseClient) {
+  const { data, error } = await supabase.from('packages').select('slug');
+  if (error) return { slugs: null as string[] | null, error };
+  return { slugs: (data ?? []).map((r) => r.slug as string), error: null };
+}
+
+export async function fetchPublishedBlogSlugs(supabase: SupabaseClient) {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('slug')
+    .not('publishedAt', 'is', null);
+  if (error) return { slugs: null as string[] | null, error };
+  return { slugs: (data ?? []).map((r) => r.slug as string), error: null };
+}
+
 async function attachPackageTags(supabase: SupabaseClient, packages: Record<string, unknown>[]) {
   const ids = packages.map((p) => p.id as string);
   const { data: links } = await supabase.from('_PackageToTag').select('A,B').in('A', ids);

@@ -1,13 +1,16 @@
 import { Review, AggregateRatings } from '@/types';
+import { phAvatar } from '@/data/placeholderMedia';
 
+/** Review seed — replace avatar URLs in admin after upload. */
 export const mockReviews: Review[] = [
   {
     id: '1',
     platform: 'Google',
     reviewerName: 'Sarah Mitchell',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200',
+    reviewerAvatar: phAvatar('SM'),
     rating: 5,
-    reviewText: 'Absolutely incredible experience! The team at Poveda made our trip to Nepal unforgettable. From the moment we arrived, everything was perfectly organized. The guides were knowledgeable, friendly, and went above and beyond to ensure we had the best experience.',
+    reviewText:
+      'EBC with this team was flawless — Lukla delays happen, but they rebooked us same day. Our guide knew every teahouse owner from Phakding to Gorak Shep.',
     date: '2024-01-15',
     reviewUrl: 'https://www.google.com/maps/reviews',
     verified: true,
@@ -16,9 +19,10 @@ export const mockReviews: Review[] = [
     id: '2',
     platform: 'TripAdvisor',
     reviewerName: 'James Anderson',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200',
+    reviewerAvatar: phAvatar('JA'),
     rating: 5,
-    reviewText: 'Best travel experience we\'ve ever had! The attention to detail, the local insights, and the genuine care for our comfort made this trip exceptional. Highly recommend their Everest Base Camp trek - it was life-changing!',
+    reviewText:
+      'Annapurna Circuit: Thorong La day started at 4am and felt tough but safe — hot lemon at every stop. Muktinath apples tasted amazing after the pass.',
     date: '2024-01-12',
     reviewUrl: 'https://www.tripadvisor.com/reviews',
     verified: true,
@@ -28,7 +32,8 @@ export const mockReviews: Review[] = [
     platform: 'Google',
     reviewerName: 'Maria Garcia',
     rating: 5,
-    reviewText: 'Outstanding service from start to finish. The cultural tours were eye-opening, and the food recommendations were spot on. Our guide was passionate about Nepal and it showed in every interaction.',
+    reviewText:
+      'Kathmandu heritage tour hit all the UNESCO squares without rushing. Our guide explained Newar festivals in Patan — we timed Tihar lights perfectly.',
     date: '2024-01-10',
     reviewUrl: 'https://www.google.com/maps/reviews',
     verified: true,
@@ -37,9 +42,10 @@ export const mockReviews: Review[] = [
     id: '4',
     platform: 'TripAdvisor',
     reviewerName: 'David Chen',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200',
+    reviewerAvatar: phAvatar('DC'),
     rating: 5,
-    reviewText: 'Professional, reliable, and truly authentic experiences. We did the Annapurna Circuit and it exceeded all expectations. The team handled everything seamlessly, allowing us to focus on enjoying the journey.',
+    reviewText:
+      'Chitwan jeep safari at dawn — we watched a rhino cross the Rapti from the canoe the same afternoon. Naturalist knew every bird call.',
     date: '2024-01-08',
     reviewUrl: 'https://www.tripadvisor.com/reviews',
     verified: true,
@@ -48,9 +54,10 @@ export const mockReviews: Review[] = [
     id: '5',
     platform: 'Google',
     reviewerName: 'Emma Thompson',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=200',
+    reviewerAvatar: phAvatar('ET'),
     rating: 5,
-    reviewText: 'Amazing! The team made us feel like family. Every detail was taken care of, and we felt safe and supported throughout our entire adventure. Can\'t wait to come back!',
+    reviewText:
+      'Pokhara wellness week reset my nervous system. Sunrise yoga facing Machhapuchhre — then actual silence. Staff coordinated ethical paragliding add-on.',
     date: '2024-01-05',
     reviewUrl: 'https://www.google.com/maps/reviews',
     verified: true,
@@ -60,7 +67,8 @@ export const mockReviews: Review[] = [
     platform: 'TripAdvisor',
     reviewerName: 'Michael Brown',
     rating: 4,
-    reviewText: 'Great experience overall! The guides were knowledgeable and the itinerary was well-planned. The only minor issue was some communication delays, but it didn\'t affect our enjoyment.',
+    reviewText:
+      'Great value Langtang trek; road to Syabrubesi was long but driver was careful. Only nit: wish we had one more acclimatization day at Kyanjin.',
     date: '2024-01-03',
     reviewUrl: 'https://www.tripadvisor.com/reviews',
     verified: true,
@@ -69,9 +77,10 @@ export const mockReviews: Review[] = [
     id: '7',
     platform: 'Google',
     reviewerName: 'Lisa Wang',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200',
+    reviewerAvatar: phAvatar('LW'),
     rating: 5,
-    reviewText: 'Exceptional service! From the initial booking to the end of our trip, everything was perfect. The cultural immersion experiences were authentic and the mountain views were breathtaking.',
+    reviewText:
+      'Lumbini cycling day through the monastic zone was peaceful — Maya Devi Temple at sunrise almost empty. Combined with Chitwan afterward seamlessly.',
     date: '2024-01-01',
     reviewUrl: 'https://www.google.com/maps/reviews',
     verified: true,
@@ -80,9 +89,10 @@ export const mockReviews: Review[] = [
     id: '8',
     platform: 'TripAdvisor',
     reviewerName: 'Robert Taylor',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200',
+    reviewerAvatar: phAvatar('RT'),
     rating: 5,
-    reviewText: 'Outstanding! The team\'s expertise and local knowledge made our trip unforgettable. We learned so much about Nepali culture and had incredible adventures. Highly recommended!',
+    reviewText:
+      'Nagarkot–Pokhara easy trip for my parents — no hard trekking, real mountain glimpses, and lovely lakeside hotels. Exactly what we needed.',
     date: '2023-12-28',
     reviewUrl: 'https://www.tripadvisor.com/reviews',
     verified: true,
@@ -92,7 +102,8 @@ export const mockReviews: Review[] = [
     platform: 'Google',
     reviewerName: 'Jennifer Lee',
     rating: 5,
-    reviewText: 'Perfect organization and wonderful guides. The trip was everything we hoped for and more. The team really cares about providing authentic experiences.',
+    reviewText:
+      'Transparent pricing on permits and domestic flights. Felt like they advocated for us when weather stacked Lukla cancellations.',
     date: '2023-12-25',
     reviewUrl: 'https://www.google.com/maps/reviews',
     verified: true,
@@ -101,10 +112,34 @@ export const mockReviews: Review[] = [
     id: '10',
     platform: 'TripAdvisor',
     reviewerName: 'Thomas Wilson',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200',
+    reviewerAvatar: phAvatar('TW'),
     rating: 5,
-    reviewText: 'Incredible journey! The attention to detail, safety measures, and cultural sensitivity were all top-notch. We felt well taken care of throughout our entire stay.',
+    reviewText:
+      'Safety briefing on AMS was thorough; guide carried pulse oximeter daily. Culture nights in Namche were a bonus we did not expect.',
     date: '2023-12-22',
+    reviewUrl: 'https://www.tripadvisor.com/reviews',
+    verified: true,
+  },
+  {
+    id: '11',
+    platform: 'Google',
+    reviewerName: 'Olivia Schmidt',
+    reviewerAvatar: phAvatar('OS'),
+    rating: 5,
+    reviewText:
+      'Full Annapurna circuit — Manang rest day hike to Ice Lake was tough but views insane. Poon Hill sunrise on the way out capped the trip.',
+    date: '2023-12-18',
+    reviewUrl: 'https://www.google.com/maps/reviews',
+    verified: true,
+  },
+  {
+    id: '12',
+    platform: 'TripAdvisor',
+    reviewerName: 'Kenji Morita',
+    rating: 4,
+    reviewText:
+      'Excellent communication in English and patient with our mixed fitness group. Would book again for ABC next spring.',
+    date: '2023-12-14',
     reviewUrl: 'https://www.tripadvisor.com/reviews',
     verified: true,
   },
@@ -112,14 +147,13 @@ export const mockReviews: Review[] = [
 
 export const aggregateRatings: AggregateRatings = {
   google: {
-    averageRating: 4.8,
-    totalReviews: 156,
+    averageRating: 4.9,
+    totalReviews: 187,
     profileUrl: 'https://www.google.com/maps/place/your-business',
   },
   tripadvisor: {
     averageRating: 4.9,
-    totalReviews: 203,
+    totalReviews: 241,
     profileUrl: 'https://www.tripadvisor.com/your-business',
   },
 };
-
