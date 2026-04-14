@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminSession } from '@/lib/supabase/adminSession';
 import { newEntityId } from '@/lib/supabase/queries';
+import { parseStorageModule } from '@/lib/storageUpload';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
@@ -34,7 +35,8 @@ export async function POST(request: NextRequest) {
             ? 'gif'
             : 'jpg';
 
-    const path = `uploads/${newEntityId()}.${ext}`;
+    const module = parseStorageModule(form.get('module'));
+    const path = `${module}/${newEntityId()}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
     const { error } = await auth.admin.storage.from('media').upload(path, buffer, {

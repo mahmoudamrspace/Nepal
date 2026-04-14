@@ -4,13 +4,20 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import type { StorageUploadModule } from '@/lib/storageUpload';
 
 interface ImageUploaderProps {
   onImageSelect: (url: string) => void;
   existingImages?: string[];
+  /** Storage folder under bucket `media` (validated server-side). */
+  storageModule?: StorageUploadModule;
 }
 
-export default function ImageUploader({ onImageSelect, existingImages = [] }: ImageUploaderProps) {
+export default function ImageUploader({
+  onImageSelect,
+  existingImages = [],
+  storageModule = 'general',
+}: ImageUploaderProps) {
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +36,7 @@ export default function ImageUploader({ onImageSelect, existingImages = [] }: Im
     try {
       const form = new FormData();
       form.append('file', file);
+      form.append('module', storageModule);
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
         body: form,
@@ -73,7 +81,7 @@ export default function ImageUploader({ onImageSelect, existingImages = [] }: Im
           {uploading ? 'Uploading…' : 'Choose file (JPEG, PNG, WebP, GIF — max 5MB)'}
         </motion.button>
         <p className="text-xs text-gray-500 mt-2">
-          Files are stored in your Supabase Storage <code className="font-mono">media</code> bucket.
+          Stored under <code className="font-mono">media/{storageModule}/</code> in Supabase Storage.
         </p>
       </div>
 

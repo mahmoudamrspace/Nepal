@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import ItineraryDayEditor from './ItineraryDayEditor';
 import FAQEditor from './FAQEditor';
 import ArrayEditor from './ArrayEditor';
+import ImageUploader from './ImageUploader';
 import { ItineraryDay, FAQ } from '@/types';
 import { ValidationFieldWrapper, CharacterCounter, ErrorMessage, ArrayLimitIndicator } from './ValidationHelper';
 import { LIMITS, ARRAY_LIMITS, validatePackage } from '@/lib/adminValidations';
@@ -445,6 +446,16 @@ export default function PackageEditor({ packageId }: PackageEditorProps) {
                 }`}
               />
             </ValidationFieldWrapper>
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <ImageUploader
+                storageModule="packages"
+                onImageSelect={(url) => {
+                  setFormData((prev) => ({ ...prev, featuredImage: url }));
+                  validateField('featuredImage', url);
+                }}
+                existingImages={formData.featuredImage ? [formData.featuredImage] : []}
+              />
+            </div>
           </div>
           <div>
             <div className="mb-2">

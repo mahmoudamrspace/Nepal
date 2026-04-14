@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { ValidationFieldWrapper, CharacterCounter } from './ValidationHelper';
+import { ValidationFieldWrapper } from './ValidationHelper';
+import ImageUploader from './ImageUploader';
 import { LIMITS, validateReview } from '@/lib/adminValidations';
 
 interface ReviewEditorProps {
@@ -217,6 +218,16 @@ export default function ReviewEditor({ reviewId }: ReviewEditorProps) {
                 }`}
               />
             </ValidationFieldWrapper>
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <ImageUploader
+                storageModule="reviews"
+                onImageSelect={(url) => {
+                  setFormData((prev) => ({ ...prev, reviewerAvatar: url }));
+                  validateField('reviewerAvatar', url);
+                }}
+                existingImages={formData.reviewerAvatar ? [formData.reviewerAvatar] : []}
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">

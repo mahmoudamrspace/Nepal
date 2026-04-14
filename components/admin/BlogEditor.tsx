@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import RichTextEditor from './RichTextEditor';
+import ImageUploader from './ImageUploader';
 import { ValidationFieldWrapper, CharacterCounter, ArrayLimitIndicator } from './ValidationHelper';
 import { LIMITS, ARRAY_LIMITS, validateBlogPost } from '@/lib/adminValidations';
 
@@ -346,6 +347,16 @@ export default function BlogEditor({ postId }: BlogEditorProps) {
                 }`}
               />
             </ValidationFieldWrapper>
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <ImageUploader
+                storageModule="blog"
+                onImageSelect={(url) => {
+                  setFormData((prev) => ({ ...prev, featuredImage: url }));
+                  validateField('featuredImage', url);
+                }}
+                existingImages={formData.featuredImage ? [formData.featuredImage] : []}
+              />
+            </div>
           </div>
           <div>
             <div className="mb-2">
