@@ -1,65 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { requireAdminSession } from '@/lib/supabase/adminSession';
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const session = await auth();
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const { id } = await params;
+  const body = await request.json();
+  const tagData = {
+    name: body.name,
+    slug: body.slug,
+    color: body.color || null,
+  };
 
-    const { id } = await params;
-    const body = await request.json();
+  const { data: updatedTag, error } = await auth.admin
+    .from('tags')
+    .update(tagData)
+    .eq('id', id)
+    .select()
+    .single();
 
-    const tagData = {
-      name: body.name,
-      slug: body.slug,
-      color: body.color || null,
-    };
-
-    const updatedTag = await prisma.tag.update({
-      where: { id },
-      data: tagData,
-    });
-
-    return NextResponse.json(updatedTag);
-  } catch (error: any) {
+  if (error) {
     console.error('Tag update error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to update tag' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  return NextResponse.json(updatedTag);
 }
 
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const session = await auth();
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const { id } = await params;
+  const { error } = await auth.admin.from('tags').delete().eq('id', id);
 
-    const { id } = await params;
-    await prisma.tag.delete({
-      where: { id },
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
+  if (error) {
     console.error('Tag delete error:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete tag' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete tag' }, { status: 500 });
   }
-}
 
+  return NextResponse.json({ success: true });
+}

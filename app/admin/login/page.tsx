@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,19 +17,17 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (result?.error) {
+      if (error) {
         toast.error('Invalid email or password');
       } else {
         toast.success('Login successful!');
         router.push('/admin');
+        router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -38,7 +36,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#dbe2dd] via-[#e8ede9] to-[#d4ddd6] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-[#485342]/5 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-[#485342]/5 rounded-full blur-3xl"></div>
@@ -51,7 +48,6 @@ export default function LoginPage() {
         transition={{ duration: 0.5 }}
         className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 md:p-12 max-w-md w-full shadow-2xl border border-white/20 relative z-10"
       >
-        {/* Branding Section */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -93,16 +89,14 @@ export default function LoginPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
           >
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Email Address
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#485342] focus:ring-2 focus:ring-[#485342]/20 transition-all bg-white/50"
-              placeholder="admin@nepal.com"
+              placeholder="you@example.com"
             />
           </motion.div>
 
@@ -111,9 +105,7 @@ export default function LoginPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.7 }}
           >
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Password
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
             <input
               type="password"
               value={password}
@@ -138,9 +130,18 @@ export default function LoginPage() {
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Signing in...
                 </span>
@@ -158,15 +159,12 @@ export default function LoginPage() {
           className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200/50 rounded-xl"
         >
           <p className="text-xs text-blue-900 leading-relaxed">
-            <strong className="font-semibold">Default Credentials:</strong>
-            <br />
-            <span className="font-mono text-blue-800">Email:</span> admin@nepal.com
-            <br />
-            <span className="font-mono text-blue-800">Password:</span> admin123
+            <strong className="font-semibold">Supabase Auth:</strong> create a user in the Supabase dashboard
+            (Authentication → Users) or run <code className="font-mono text-blue-800">npm run db:seed</code> after
+            applying the SQL migration. Use that email and password here.
           </p>
         </motion.div>
       </motion.div>
     </div>
   );
 }
-

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { createAnonClient } from '@/lib/supabase/anon';
+import { fetchBlogPostPublishedBySlug } from '@/lib/supabase/queries';
 
 export async function GET(
   request: NextRequest,
@@ -7,42 +8,23 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const post = await prisma.blogPost.findUnique({
-      where: { slug },
-      include: {
-        author: {
-          select: {
-            name: true,
-            avatar: true,
-            bio: true,
-          },
-        },
-        tags: {
-          select: {
-            name: true,
-            slug: true,
-          },
-        },
-      },
-    });
+    const supabase = createAnonClient();
+    const { post, error } = await fetchBlogPostPublishedBySlug(supabase, slug);
 
-    if (!post || !post.publishedAt) {
+    if (error) {
+      console.error('Blog post fetch error:', error);
+      return NextResponse.json({ error: 'Failed to fetch blog post' }, { status: 500 });
+    }
+
+    if (!post) {
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
 
-    // Increment views
-    await prisma.blogPost.update({
-      where: { id: post.id },
-      data: { views: { increment: 1 } },
-    });
+    await supabase.rpc('increment_post_views', { p_slug: slug });
 
     return NextResponse.json(post);
-  } catch (error) {
-    console.error('Blog post fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch blog post' },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error('Blog post fetch error:', e);
+    return NextResponse.json({ error: 'Failed to fetch blog post' }, { status: 500 });
   }
 }
-

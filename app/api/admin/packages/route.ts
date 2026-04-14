@@ -1,51 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { requireAdminSession } from '@/lib/supabase/adminSession';
 import { validatePackage } from '@/lib/adminValidations';
+import { newEntityId } from '@/lib/supabase/queries';
 
-export async function GET(request: NextRequest) {
-  try {
-    const session = await auth();
+export async function GET() {
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const { data: packages, error } = await auth.admin
+    .from('packages')
+    .select('id, slug, name, price, currency, category, featured, createdAt')
+    .order('createdAt', { ascending: false });
 
-    const packages = await prisma.package.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        slug: true,
-        name: true,
-        price: true,
-        currency: true,
-        category: true,
-        featured: true,
-        createdAt: true,
-      },
-    });
-
-    return NextResponse.json(packages);
-  } catch (error) {
+  if (error) {
     console.error('Packages fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch packages' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch packages' }, { status: 500 });
   }
+
+  return NextResponse.json(packages ?? []);
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
+
   try {
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
-    
-    // Validate the package data
     const validationResult = validatePackage({
       slug: body.slug,
       name: body.name,
@@ -56,7 +36,7 @@ export async function POST(request: NextRequest) {
       duration: body.duration,
       location: body.location,
       difficulty: body.difficulty,
-      groupSize: parseInt(body.groupSize),
+      groupSize: parseInt(body.groupSize, 10),
       images: body.images || [],
       featuredImage: body.featuredImage,
       category: body.category,
@@ -74,25 +54,27 @@ export async function POST(request: NextRequest) {
         field: issue.path.join('.'),
         message: issue.message,
       }));
-      return NextResponse.json(
-        { error: 'Validation failed', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
     }
 
     const packageData = validationResult.data;
+    const id = newEntityId();
 
-    const newPackage = await prisma.package.create({
-      data: packageData,
-    });
+    const { data: newPackage, error } = await auth.admin
+      .from('packages')
+      .insert({ id, ...packageData })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Package creation error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json(newPackage, { status: 201 });
-  } catch (error: any) {
-    console.error('Package creation error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create package' },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Failed to create package';
+    console.error('Package creation error:', e);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

@@ -1,55 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { requireAdminSession } from '@/lib/supabase/adminSession';
+import { newEntityId } from '@/lib/supabase/queries';
 
-export async function GET(request: NextRequest) {
-  try {
-    const session = await auth();
+export async function GET() {
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const { data: tags, error } = await auth.admin.from('tags').select('*').order('name', { ascending: true });
 
-    const tags = await prisma.tag.findMany({
-      orderBy: { name: 'asc' },
-    });
-
-    return NextResponse.json(tags);
-  } catch (error) {
+  if (error) {
     console.error('Tags fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tags' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch tags' }, { status: 500 });
   }
+
+  return NextResponse.json(tags ?? []);
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
+
   try {
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
     const tagData = {
+      id: newEntityId(),
       name: body.name,
       slug: body.slug,
       color: body.color || null,
     };
 
-    const newTag = await prisma.tag.create({
-      data: tagData,
-    });
+    const { data: newTag, error } = await auth.admin.from('tags').insert(tagData).select().single();
+
+    if (error) {
+      console.error('Tag creation error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json(newTag, { status: 201 });
-  } catch (error: any) {
-    console.error('Tag creation error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create tag' },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Failed to create tag';
+    console.error('Tag creation error:', e);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

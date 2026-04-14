@@ -6,24 +6,33 @@ todos:
     content: Create Supabase project; apply schema (Prisma migrate/push to direct URL or hand-written SQL); add profiles + auth.users linkage
     status: pending
   - id: auth-middleware
-    content: Replace NextAuth with @supabase/ssr; rewrite middleware and admin login; migrate admin users (invite/reset strategy)
-    status: pending
-  - id: storage-images
-    content: Add Storage bucket(s), policies, upload flow in admin, public URLs in DB, next/image remotePatterns; migrate or backfill existing URL fields
+    content: Replace NextAuth with @supabase/ssr; rewrite middleware, admin login/layout/header/dashboard, all admin API session checks; migrate admin users (invite/reset)
     status: pending
   - id: data-layer-routes
-    content: Add lib/supabase server + admin clients; replace all prisma usages in app/api/* and app/sitemap.ts
+    content: Add lib/supabase server + admin clients; replace all prisma usages in app/api/*, app/sitemap.ts, prisma/seed (or SQL); decide service-role+session vs RLS per route
     status: pending
   - id: rls-policies
-    content: Enable RLS and policies for public read / public insert / admin-only tables; verify anon vs service role paths
+    content: Enable RLS (start restrictive); public read/insert policies; admin paths verified with anon + service role; Storage policies aligned
+    status: pending
+  - id: storage-images
+    content: Storage bucket(s), upload flow in admin, public URLs in DB, next/image remotePatterns; optional backfill
     status: pending
   - id: cleanup-deps
-    content: Remove Prisma, NextAuth, unused DB packages; switch DB change workflow to Supabase migrations
+    content: Remove Prisma, NextAuth, unused DB packages; update Docker/Makefile/CI; switch schema changes to supabase/migrations
     status: pending
 isProject: false
 ---
 
 # Full Supabase backend migration
+
+## Recommended execution order
+
+1. **Supabase project + schema** — Postgres tables/enums/M2M match [prisma/schema.prisma](prisma/schema.prisma); add `public.profiles` (and optional trigger from `auth.users`).
+2. **Auth + middleware + admin UI** — Replace NextAuth end-to-end so `/admin` and session cookies work before relying on new data APIs.
+3. **Data layer** — Introduce `lib/supabase/`*; replace every `prisma` usage in API routes, [app/sitemap.ts](app/sitemap.ts), and seeding.
+4. **RLS** — Turn on policies incrementally; avoid enabling broad RLS before public routes use the anon client correctly.
+5. **Storage** — Buckets, upload UX, `remotePatterns` (depends on working admin auth).
+6. **Cleanup** — Remove Prisma/NextAuth deps; point docs/Docker/CI at Supabase env vars and migrations.
 
 ## Current state
 
@@ -82,6 +91,7 @@ flowchart LR
   - **Important**: Use the **direct** URL for migrations; for high-concurrency serverless later, use the **pooler** URL in runtime with [Prisma + PgBouncer settings](https://www.prisma.io/docs/guides/database/supabase) if you briefly keep Prisma during transition—but the end goal here is **removing Prisma**, so pooler concerns shift to the Supabase JS client connection (HTTP) instead.
 3. Add `**public.profiles`** (or extend via trigger): `id uuid references auth.users`, `role` text/check matching your `Role` enum, `name`, timestamps. This replaces the app-owned `users` table for **identity**; you can drop `public.users` after migration or keep it unused.
 4. **Data migration** from existing DB: `pg_dump` / restore into Supabase, or re-seed with [prisma/seed.ts](prisma/seed.ts) adapted to Supabase (see Auth below).
+5. **Verify implicit M2M table names** in the database after push (e.g. `_BlogPostToTag`, `_PackageToTag`) before writing PostgREST queries.
 
 ## 2. Auth: NextAuth → Supabase Auth
 
@@ -91,6 +101,15 @@ flowchart LR
 4. **Existing `User` rows**: Supabase does not use your bcrypt hashes directly. Practical options: **invite** admins to set a password, one-time **password reset**, or create users via **Admin API** with a forced reset on first login. Plan this explicitly so nobody is locked out.
 5. Update [app/api/auth/[...nextauth]/route.ts](app/api/auth/[...nextauth]/route.ts) → remove or replace with Supabase callback routes if using OAuth later.
 
+### NextAuth / UI touchpoints (all must be updated)
+
+- [app/admin/layout.tsx](app/admin/layout.tsx) — `SessionProvider` → Supabase-aware provider or drop if using client `createBrowserClient` only.
+- [app/admin/login/page.tsx](app/admin/login/page.tsx) — `signIn('credentials')` → Supabase `signInWithPassword` (or magic link).
+- [components/admin/AdminHeader.tsx](components/admin/AdminHeader.tsx) — `useSession` / `signOut` → Supabase user + `signOut`.
+- [app/admin/page.tsx](app/admin/page.tsx) — `useSession` → Supabase session/user.
+- [types/next-auth.d.ts](types/next-auth.d.ts) — remove or replace with your session types.
+- **Admin API routes** that call `auth()` today (packages, blog, tags, reviews, bookings, authors, stats): either keep a **server-side `getUser()`** in each handler for defense-in-depth, or rely on middleware only and use service role after that—**document the chosen pattern** and apply consistently.
+
 ## 3. Supabase Storage (replace URL-only images)
 
 **Goal**: Stop relying on pasted external URLs in admin; store files in Supabase and persist **stable references** in Postgres (`featuredImage`, `images[]`, `avatar`, reviewer avatars if desired).
@@ -99,7 +118,7 @@ flowchart LR
 
 - Prefer **one bucket** (e.g. `media`) with **folder prefixes** (`packages/`, `blog/`, `authors/`, `reviews/`) *or* separate buckets per concern—single bucket is simpler to policy and backup.
 - **Public read for marketing assets** (recommended): bucket is **public**; `SELECT` on `storage.objects` for `anon` on that bucket, so `getPublicUrl()` works for [next/image](https://nextjs.org/docs/app/api-reference/components/image#remotepatterns) without signing every request.
-- **Upload policies**: allow `INSERT`/`UPDATE`/`DELETE` only for `**authenticated`** users who are admins. Implement via Storage RLS policies on `storage.objects` (e.g. check `auth.uid()` and join to `profiles.role`), or use a **server Route Handler** that verifies the session then uploads with the **service role** client (simpler policies, all writes server-side).
+- **Upload policies**: allow `INSERT`/`UPDATE`/`DELETE` only for **authenticated** users who are admins. Implement via Storage RLS policies on `storage.objects` (e.g. check `auth.uid()` and join to `profiles.role`), or use a **server Route Handler** that verifies the session then uploads with the **service role** client (simpler policies, all writes server-side).
 
 ### Upload UX ([components/admin/ImageUploader.tsx](components/admin/ImageUploader.tsx))
 
@@ -131,30 +150,33 @@ flowchart LR
 For each file that imports [lib/db.ts](lib/db.ts), replace `prisma.*` with `supabase.from('...')` calls:
 
 
-| Area                   | Tables / notes                                                                                            |
-| ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| Packages               | `packages`, tag links via join table                                                                      |
-| Blog                   | `blog_posts`, `authors`, `_BlogPostToTag` (or whatever name Prisma created—verify in DB)                  |
-| Bookings               | `bookings` — public create in [app/api/bookings/route.ts](app/api/bookings/route.ts) vs admin list/update |
-| Reviews, tags, contact | respective tables                                                                                         |
-| Stats                  | `count` queries via `.select('*', { count: 'exact', head: true })`                                        |
+| Area                   | Tables / notes                                                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Packages               | `packages`, tag links via join table                                                                                                     |
+| Blog                   | `blog_posts`, `authors`, M2M join table (**verify name in DB**)                                                                          |
+| Bookings               | `bookings` — public create in [app/api/bookings/route.ts](app/api/bookings/route.ts) vs admin list/update                                |
+| Reviews, tags, contact | respective tables                                                                                                                        |
+| Stats                  | `count` queries via `.select('*', { count: 'exact', head: true })`                                                                       |
+| Blog views             | [app/api/blog/[slug]/route.ts](app/api/blog/[slug]/route.ts) — `update` on `views`; align with RLS (often service role or narrow policy) |
 
+
+**Multi-step writes** (blog post + tags, package + tags): use a **Postgres RPC** if you need atomicity; otherwise document ordering and failure behavior.
 
 Implementation details to plan for:
 
 - **Relations**: Supabase/PostgREST uses `select('*, author(*), tags(*)')` style embeds; M2M may need explicit `.from('join_table')` or views.
 - **JSON columns** (`itinerary`, `faq`, `travelers`): map to `Json` columns as today.
 - **Enums**: Postgres enums created by Prisma remain valid; generated TypeScript types from Supabase CLI will reflect them.
-- **Transactions**: use RPC (`supabase.rpc`) or multiple ordered calls where you today rely on Prisma transactions—identify any multi-step writes (e.g. blog post + tags) and wrap in a **Postgres function** if you need atomicity.
+- **Transactions**: use RPC (`supabase.rpc`) or multiple ordered calls where you today rely on Prisma transactions.
 
-Add a small `**lib/supabase/server.ts`** (cookie client) and `**lib/supabase/admin.ts`** (service role, `server-only`) to centralize construction and env validation (`NEXT_PUBLIC_SUPABASE_URL`, keys).
+Add `**lib/supabase/server.ts`** (cookie client) and `**lib/supabase/admin.ts`** (service role, `server-only`) to centralize construction and env validation (`NEXT_PUBLIC_SUPABASE_URL`, keys).
 
 ## 5. Row Level Security (RLS)
 
 Enable RLS on all public tables. Typical policy sketch:
 
 - `**packages`, `reviews`**: `SELECT` for `anon` (and `authenticated` if needed); no insert/update/delete for anon.
-- `**blog_posts`**: `SELECT` where `published_at is not null` (and any other “published” rule you use); admin writes only via service role or policies checking `profiles.role`.
+- `**blog_posts**`: `SELECT` where `published_at is not null` (and any other “published” rule you use); admin writes only via service role or policies checking `profiles.role`.
 - `**bookings**`: `INSERT` for anon/authenticated for the public booking flow if desired; `SELECT`/`UPDATE` only for admins (service role or role-checked policy).
 - `**contact_submissions`, `newsletter_subscribers**`: insert for public where applicable; read/update only admin.
 
@@ -168,6 +190,7 @@ Iterate until public API routes work with **anon** client and admin routes use *
 - Remove [prisma.config.ts](prisma.config.ts), schema, and migrate future DB changes to **Supabase migrations** (SQL in `supabase/migrations`) once Prisma is retired—or keep one-time Prisma only until cutover.
 - `**npm` scripts**: replace `db:`* Prisma scripts with `supabase` CLI commands where useful.
 - **Env docs**: document required vars in your deployment platform (Vercel, Docker, etc.); ensure **service role** is never prefixed with `NEXT_PUBLIC_`.
+- **Local dev / Docker**: decide whether developers use Supabase only, or keep optional local Postgres; update [docker-compose.yml](docker-compose.yml), [Makefile](Makefile), [Dockerfile](Dockerfile) if they still assume Prisma + local DB.
 
 ## 7. Optional follow-up
 
@@ -176,9 +199,10 @@ Iterate until public API routes work with **anon** client and admin routes use *
 ## Risk / testing checklist
 
 - Admin login, session refresh, and protected middleware behavior.
-- Public package/blog/review reads with anon + RLS.
+- Public package/blog/review reads with anon + RLS (**RLS too loose on `bookings` / `contact_submissions` is a high-severity risk**—start deny-by-default).
 - Booking creation and admin booking updates.
 - M2M tag updates on blog posts and packages (most error-prone area).
 - Sitemap generation still sees published packages/posts.
+- Blog slug route: view counter still works under RLS.
 - **Storage**: upload from admin, public pages render `next/image` correctly, old external URLs still work; delete/replace object behavior if you implement removal on edit.
 

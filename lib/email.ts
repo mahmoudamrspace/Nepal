@@ -1,8 +1,5 @@
 import { Resend } from 'resend';
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Get email addresses from environment variables
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@example.com';
 const TO_EMAIL = process.env.TO_EMAIL || 'contact@example.com';
@@ -20,10 +17,13 @@ interface ContactFormData {
  * Send notification email to business when contact form is submitted
  */
 export async function sendContactNotification(data: ContactFormData) {
-  if (!process.env.RESEND_API_KEY) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
     console.warn('RESEND_API_KEY not set, skipping email notification');
     return { success: false, error: 'Email service not configured' };
   }
+
+  const resend = new Resend(apiKey);
 
   try {
     const { data: emailData, error } = await resend.emails.send({
@@ -117,10 +117,13 @@ You can reply directly to this email to respond to ${data.name}.
  * Send confirmation email to user after contact form submission
  */
 export async function sendContactConfirmation(data: ContactFormData) {
-  if (!process.env.RESEND_API_KEY) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
     console.warn('RESEND_API_KEY not set, skipping confirmation email');
     return { success: false, error: 'Email service not configured' };
   }
+
+  const resend = new Resend(apiKey);
 
   try {
     const { data: emailData, error } = await resend.emails.send({

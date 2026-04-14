@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { createAnonClient } from '@/lib/supabase/anon';
+import { fetchPackageBySlug } from '@/lib/supabase/queries';
 
 export async function GET(
   request: NextRequest,
@@ -7,21 +8,21 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const pkg = await prisma.package.findUnique({
-      where: { slug },
-    });
+    const supabase = createAnonClient();
+    const { package: pkg, error } = await fetchPackageBySlug(supabase, slug);
+
+    if (error) {
+      console.error('Package fetch error:', error);
+      return NextResponse.json({ error: 'Failed to fetch package' }, { status: 500 });
+    }
 
     if (!pkg) {
       return NextResponse.json({ error: 'Package not found' }, { status: 404 });
     }
 
     return NextResponse.json(pkg);
-  } catch (error) {
-    console.error('Package fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch package' },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error('Package fetch error:', e);
+    return NextResponse.json({ error: 'Failed to fetch package' }, { status: 500 });
   }
 }
-

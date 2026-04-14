@@ -1,30 +1,52 @@
 'use client';
 
-import { useState } from 'react';
-import { signOut, useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchBar from './SearchBar';
+import { createClient } from '@/lib/supabase/client';
+
+type Me = { email: string; name: string; role: string };
 
 export default function AdminHeader() {
-  const { data: session } = useSession();
+  const router = useRouter();
+  const [me, setMe] = useState<Me | null>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Don't render header if no session
-  if (!session) {
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/admin/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setMe(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!me) {
     return null;
   }
 
-  const userInitials = session?.user?.name
-    ?.split(' ')
+  const userInitials = me.name
+    .split(' ')
     .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2) || 'U';
 
   const handleSearch = (query: string) => {
-    // Search functionality can be implemented here
     console.log('Search:', query);
+  };
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/admin/login');
+    router.refresh();
   };
 
   return (
@@ -39,9 +61,8 @@ export default function AdminHeader() {
             />
           </div>
         </div>
-        
+
         <div className="flex items-center gap-4">
-          {/* Notifications */}
           <div className="relative">
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -50,11 +71,16 @@ export default function AdminHeader() {
               className="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
               </svg>
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </motion.button>
-            
+
             <AnimatePresence>
               {showNotifications && (
                 <motion.div
@@ -81,7 +107,6 @@ export default function AdminHeader() {
             </AnimatePresence>
           </div>
 
-          {/* User Menu */}
           <div className="relative">
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -93,8 +118,8 @@ export default function AdminHeader() {
                 {userInitials}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-sm font-semibold text-gray-800">{session?.user?.name}</p>
-                <p className="text-xs text-gray-500">{session?.user?.role}</p>
+                <p className="text-sm font-semibold text-gray-800">{me.name}</p>
+                <p className="text-xs text-gray-500">{me.role}</p>
               </div>
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -104,10 +129,7 @@ export default function AdminHeader() {
             <AnimatePresence>
               {showUserMenu && (
                 <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowUserMenu(false)}
-                  ></div>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)}></div>
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -115,8 +137,8 @@ export default function AdminHeader() {
                     className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50"
                   >
                     <div className="px-4 py-3 border-b border-gray-200">
-                      <p className="text-sm font-semibold text-gray-800">{session?.user?.name}</p>
-                      <p className="text-xs text-gray-500">{session?.user?.email}</p>
+                      <p className="text-sm font-semibold text-gray-800">{me.name}</p>
+                      <p className="text-xs text-gray-500">{me.email}</p>
                     </div>
                     <div className="py-1">
                       <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
@@ -128,7 +150,8 @@ export default function AdminHeader() {
                     </div>
                     <div className="border-t border-gray-200 pt-1">
                       <button
-                        onClick={() => signOut({ callbackUrl: '/admin/login' })}
+                        type="button"
+                        onClick={() => handleSignOut()}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
                         Sign Out
@@ -144,4 +167,3 @@ export default function AdminHeader() {
     </header>
   );
 }
-

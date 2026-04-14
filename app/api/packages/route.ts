@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { createAnonClient } from '@/lib/supabase/anon';
+import { fetchPackages } from '@/lib/supabase/queries';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,26 +8,20 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const featured = searchParams.get('featured');
 
-    const where: any = {};
-    if (category) {
-      where.category = category;
-    }
-    if (featured === 'true') {
-      where.featured = true;
-    }
-
-    const packages = await prisma.package.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
+    const supabase = createAnonClient();
+    const { packages, error } = await fetchPackages(supabase, {
+      category,
+      featured: featured === 'true',
     });
 
+    if (error) {
+      console.error('Packages fetch error:', error);
+      return NextResponse.json({ error: 'Failed to fetch packages' }, { status: 500 });
+    }
+
     return NextResponse.json(packages);
-  } catch (error) {
-    console.error('Packages fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch packages' },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error('Packages fetch error:', e);
+    return NextResponse.json({ error: 'Failed to fetch packages' }, { status: 500 });
   }
 }
-

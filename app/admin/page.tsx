@@ -1,6 +1,5 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -19,26 +18,29 @@ interface RecentBooking {
 }
 
 export default function AdminDashboard() {
-  const { data: session, status } = useSession();
+  const [meName, setMeName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
 
   useEffect(() => {
-    if (status !== 'loading') {
-      setLoading(false);
-    }
-  }, [status]);
+    fetch('/api/admin/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.name) setMeName(data.name);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     fetch('/api/admin/bookings?limit=5')
       .then((res) => res.json())
       .then((data) => {
-        setRecentBookings(data.slice(0, 5));
+        if (Array.isArray(data)) setRecentBookings(data.slice(0, 5));
       })
       .catch(() => {});
   }, []);
 
-  if (loading || status === 'loading') {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -51,13 +53,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="pt-16">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h1 className="text-3xl font-serif font-bold text-gray-800 mb-2">
-          Welcome back, {session?.user?.name}! 👋
+          Welcome back{meName ? `, ${meName}` : ''}! 👋
         </h1>
         <p className="text-gray-600">Here's what's happening with your business today.</p>
       </motion.div>
@@ -65,7 +63,6 @@ export default function AdminDashboard() {
       <DashboardStats />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        {/* Recent Bookings */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -120,7 +117,6 @@ export default function AdminDashboard() {
           )}
         </motion.div>
 
-        {/* Quick Actions */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -152,7 +148,12 @@ export default function AdminDashboard() {
               >
                 <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
                   </svg>
                 </div>
                 <p className="font-semibold text-gray-800">New Post</p>
@@ -167,7 +168,12 @@ export default function AdminDashboard() {
               >
                 <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
                   </svg>
                 </div>
                 <p className="font-semibold text-gray-800">View Bookings</p>
@@ -182,7 +188,12 @@ export default function AdminDashboard() {
               >
                 <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mb-3">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                    />
                   </svg>
                 </div>
                 <p className="font-semibold text-gray-800">Manage Tags</p>
@@ -195,4 +206,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

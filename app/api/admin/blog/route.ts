@@ -1,54 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import { requireAdminSession } from '@/lib/supabase/adminSession';
 import { validateBlogPost } from '@/lib/adminValidations';
+import { fetchBlogPostsAdmin } from '@/lib/supabase/queries';
+import { replaceBlogPostTags } from '@/lib/supabase/blogTags';
+import { newEntityId } from '@/lib/supabase/queries';
 
-export async function GET(request: NextRequest) {
-  try {
-    const session = await auth();
+export async function GET() {
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const posts = await prisma.blogPost.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        author: {
-          select: {
-            name: true,
-          },
-        },
-        tags: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return NextResponse.json(posts);
-  } catch (error) {
+  const { posts, error } = await fetchBlogPostsAdmin(auth.admin);
+  if (error) {
     console.error('Blog posts fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch blog posts' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch blog posts' }, { status: 500 });
   }
+
+  return NextResponse.json(posts ?? []);
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
+
   try {
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
-
-    // Validate the blog post data
     const validationResult = validateBlogPost({
       slug: body.slug,
       title: body.title,
@@ -70,14 +45,13 @@ export async function POST(request: NextRequest) {
         field: issue.path.join('.'),
         message: issue.message,
       }));
-      return NextResponse.json(
-        { error: 'Validation failed', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
-    const postData = {
+    const id = newEntityId();
+    const postRow = {
+      id,
       slug: validatedData.slug,
       title: validatedData.title,
       excerpt: validatedData.excerpt,
@@ -86,29 +60,28 @@ export async function POST(request: NextRequest) {
       images: validatedData.images,
       authorId: validatedData.authorId,
       category: validatedData.category,
-      publishedAt: validatedData.publishedAt ? new Date(validatedData.publishedAt) : null,
+      publishedAt: validatedData.publishedAt
+        ? new Date(validatedData.publishedAt).toISOString()
+        : null,
       featured: validatedData.featured,
       seoTitle: validatedData.seoTitle || null,
       seoDescription: validatedData.seoDescription || null,
-      readingTime: Math.ceil((validatedData.content || '').split(' ').length / 200) || 5,
+      readingTime: Math.ceil((validatedData.content || '').split(/\s+/).filter(Boolean).length / 200) || 5,
     };
 
-    const newPost = await prisma.blogPost.create({
-      data: {
-        ...postData,
-        tags: {
-          connect: validatedData.tagIds.map((id: string) => ({ id })),
-        },
-      },
-    });
+    const { data: newPost, error } = await auth.admin.from('blog_posts').insert(postRow).select().single();
+
+    if (error) {
+      console.error('Blog post creation error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    await replaceBlogPostTags(auth.admin, id, validatedData.tagIds);
 
     return NextResponse.json(newPost, { status: 201 });
-  } catch (error: any) {
-    console.error('Blog post creation error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create blog post' },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Failed to create blog post';
+    console.error('Blog post creation error:', e);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

@@ -1,55 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/db';
-import { validateReview } from '@/lib/adminValidations';
 import { z } from 'zod';
+import { requireAdminSession } from '@/lib/supabase/adminSession';
+import { validateReview } from '@/lib/adminValidations';
+import { newEntityId } from '@/lib/supabase/queries';
 
 export async function GET(request: NextRequest) {
-  try {
-    const session = await auth();
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const { searchParams } = new URL(request.url);
+  const platform = searchParams.get('platform');
+  const rating = searchParams.get('rating');
 
-    const { searchParams } = new URL(request.url);
-    const platform = searchParams.get('platform');
-    const rating = searchParams.get('rating');
-
-    const where: any = {};
-    if (platform && platform !== 'all') {
-      where.platform = platform;
-    }
-    if (rating && rating !== 'all') {
-      where.rating = parseInt(rating);
-    }
-
-    const reviews = await prisma.review.findMany({
-      where,
-      orderBy: { date: 'desc' },
-    });
-
-    return NextResponse.json(reviews);
-  } catch (error) {
-    console.error('Reviews fetch error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch reviews' },
-      { status: 500 }
-    );
+  let q = auth.admin.from('reviews').select('*').order('date', { ascending: false });
+  if (platform && platform !== 'all') {
+    q = q.eq('platform', platform);
   }
+  if (rating && rating !== 'all') {
+    q = q.eq('rating', parseInt(rating, 10));
+  }
+
+  const { data: reviews, error } = await q;
+  if (error) {
+    console.error('Reviews fetch error:', error);
+    return NextResponse.json({ error: 'Failed to fetch reviews' }, { status: 500 });
+  }
+
+  return NextResponse.json(reviews ?? []);
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminSession();
+  if (!auth.ok) return auth.response;
+
   try {
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await request.json();
-
-    // Validate the review data
     const validationResult = validateReview({
       platform: body.platform,
       reviewerName: body.reviewerName,
@@ -66,40 +51,36 @@ export async function POST(request: NextRequest) {
         field: issue.path.join('.'),
         message: issue.message,
       }));
-      return NextResponse.json(
-        { error: 'Validation failed', details: errors },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Validation failed', details: errors }, { status: 400 });
     }
 
     const validatedData = validationResult.data;
+    const row = {
+      id: newEntityId(),
+      platform: validatedData.platform,
+      reviewerName: validatedData.reviewerName,
+      reviewerAvatar: validatedData.reviewerAvatar || null,
+      rating: validatedData.rating,
+      reviewText: validatedData.reviewText,
+      date: new Date(validatedData.date).toISOString(),
+      reviewUrl: validatedData.reviewUrl || null,
+      verified: validatedData.verified,
+    };
 
-    const review = await prisma.review.create({
-      data: {
-        platform: validatedData.platform,
-        reviewerName: validatedData.reviewerName,
-        reviewerAvatar: validatedData.reviewerAvatar || null,
-        rating: validatedData.rating,
-        reviewText: validatedData.reviewText,
-        date: new Date(validatedData.date),
-        reviewUrl: validatedData.reviewUrl || null,
-        verified: validatedData.verified,
-      },
-    });
+    const { data: review, error } = await auth.admin.from('reviews').insert(row).select().single();
+
+    if (error) {
+      console.error('Review creation error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json(review, { status: 201 });
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.issues },
-        { status: 400 }
-      );
+  } catch (e: unknown) {
+    if (e instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Validation error', details: e.issues }, { status: 400 });
     }
-    console.error('Review creation error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create review' },
-      { status: 500 }
-    );
+    const message = e instanceof Error ? e.message : 'Failed to create review';
+    console.error('Review creation error:', e);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

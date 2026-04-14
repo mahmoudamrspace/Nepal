@@ -1,13 +1,8 @@
-import { auth } from './auth';
-import { NextResponse } from 'next/server';
+import { requireAdminSession } from '@/lib/supabase/adminSession';
 
-export async function requireAdmin(request: Request) {
-  const session = await auth();
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  return null; // No error, user is authenticated
+/** @deprecated Use requireAdminSession from @/lib/supabase/adminSession */
+export async function requireAdmin() {
+  const result = await requireAdminSession();
+  if (!result.ok) return result.response;
+  return null;
 }
-
