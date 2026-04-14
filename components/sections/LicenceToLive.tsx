@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { getBlurDataURL, getImageSizes } from '@/lib/imageUtils';
+import { getBlurDataURL, getImageSizes, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 const cards = [
   {
@@ -91,6 +91,7 @@ export default function LicenceToLive() {
                     placeholder="blur"
                     blurDataURL={getBlurDataURL()}
                     loading={index < 3 ? 'eager' : 'lazy'}
+                    unoptimized={shouldBypassImageOptimizer(card.imageUrl)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
                 </motion.div>

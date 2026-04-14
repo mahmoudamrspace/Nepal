@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { BlogPost } from '@/types';
-import { getBlurDataURL, getImageSizes } from '@/lib/imageUtils';
+import { getBlurDataURL, getImageSizes, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -47,6 +47,7 @@ export default function BlogCard({ post, index = 0, featured = false }: BlogCard
               placeholder="blur"
               blurDataURL={getBlurDataURL()}
               loading={index < 3 ? 'eager' : 'lazy'}
+              unoptimized={shouldBypassImageOptimizer(post.featuredImage)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </motion.div>
@@ -74,6 +75,7 @@ export default function BlogCard({ post, index = 0, featured = false }: BlogCard
                   sizes="32px"
                   placeholder="blur"
                   blurDataURL={getBlurDataURL()}
+                  unoptimized={shouldBypassImageOptimizer(post.author.avatar)}
                 />
               )}
               <span className="font-medium">{post.author.name}</span>

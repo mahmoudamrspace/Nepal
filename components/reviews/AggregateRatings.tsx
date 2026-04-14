@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import type { AggregateRatings } from '@/types';
 
 interface AggregateRatingsProps {
@@ -45,12 +44,12 @@ export default function AggregateRatings({ ratings }: AggregateRatingsProps) {
         className="bg-white rounded-lg p-6 md:p-8 card-shadow hover:card-shadow-hover transition-all duration-300"
       >
         <div className="flex items-center gap-4 mb-4">
-          <Image
+          <img
             src={getPlatformLogo('Google')}
             alt="Google"
             width={80}
             height={30}
-            className="object-contain"
+            className="object-contain h-8 w-20"
           />
           <div>
             <h3 className="text-xl font-serif text-[#2d2d2d]">Google Reviews</h3>
@@ -83,12 +82,12 @@ export default function AggregateRatings({ ratings }: AggregateRatingsProps) {
         className="bg-white rounded-lg p-6 md:p-8 card-shadow hover:card-shadow-hover transition-all duration-300"
       >
         <div className="flex items-center gap-4 mb-4">
-          <Image
+          <img
             src={getPlatformLogo('TripAdvisor')}
             alt="TripAdvisor"
             width={120}
             height={30}
-            className="object-contain"
+            className="object-contain h-8 w-[120px]"
           />
           <div>
             <h3 className="text-xl font-serif text-[#2d2d2d]">TripAdvisor</h3>

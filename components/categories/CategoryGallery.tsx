@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { shouldBypassImageOptimizer } from '@/lib/imageUtils';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 
@@ -49,6 +50,7 @@ export default function CategoryGallery({ images, title = 'GALLERY' }: CategoryG
                   alt={`Gallery image ${index + 1}`}
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-300"
+                  unoptimized={shouldBypassImageOptimizer(image)}
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
               </motion.div>
@@ -81,6 +83,7 @@ export default function CategoryGallery({ images, title = 'GALLERY' }: CategoryG
                   fill
                   className="object-contain rounded-lg"
                   sizes="(max-width: 1200px) 100vw, 1200px"
+                  unoptimized={shouldBypassImageOptimizer(images[selectedImage])}
                 />
               </div>
               <button

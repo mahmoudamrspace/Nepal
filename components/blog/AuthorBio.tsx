@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Author } from '@/types';
+import { shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface AuthorBioProps {
   author: Author;
@@ -19,6 +20,7 @@ export default function AuthorBio({ author }: AuthorBioProps) {
               width={80}
               height={80}
               className="rounded-full"
+              unoptimized={shouldBypassImageOptimizer(author.avatar)}
             />
           </div>
         )}

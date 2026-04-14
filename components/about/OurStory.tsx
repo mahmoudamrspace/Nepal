@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface OurStoryProps {
   title: string;
@@ -78,6 +79,7 @@ export default function OurStory({ title, content, images }: OurStoryProps) {
                     alt={`Story image ${index + 2}`}
                     fill
                     className="object-cover"
+                    unoptimized={shouldBypassImageOptimizer(image)}
                   />
                 </motion.div>
               ))}

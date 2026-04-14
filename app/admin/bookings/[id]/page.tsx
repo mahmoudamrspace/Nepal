@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import { shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface BookingDetails {
   id: string;
@@ -123,6 +124,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                   fill
                   className="object-cover"
                   sizes="96px"
+                  unoptimized={shouldBypassImageOptimizer(booking.package.featuredImage)}
                 />
               </div>
               <div>

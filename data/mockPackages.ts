@@ -1,7 +1,7 @@
 import { Package } from '@/types';
-import { phGallery, phWide } from '@/data/placeholderMedia';
+import { SEED_PACKAGE_IMAGES } from '@/data/seedMedia';
 
-/** Rich seed packages — images are placeholders; replace in admin after upload. */
+/** Rich seed packages — stock imagery via `seedMedia`; replace in admin after upload. */
 export const mockPackages: Package[] = [
   {
     id: '1',
@@ -17,12 +17,8 @@ export const mockPackages: Package[] = [
     location: 'Khumbu Region, Nepal',
     difficulty: 'Challenging',
     groupSize: 12,
-    images: [
-      phGallery('EBC — replace in admin'),
-      phGallery('Khumbu trail'),
-      phGallery('Namche Bazaar'),
-    ],
-    featuredImage: phWide('Everest Base Camp Trek'),
+    images: SEED_PACKAGE_IMAGES['everest-base-camp-trek'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['everest-base-camp-trek'].featured,
     itinerary: [
       {
         day: 1,
@@ -206,11 +202,8 @@ export const mockPackages: Package[] = [
     location: 'Kathmandu Valley, Nepal',
     difficulty: 'Easy',
     groupSize: 15,
-    images: [
-      phGallery('Durbar Square — replace'),
-      phGallery('Stupa Kathmandu'),
-    ],
-    featuredImage: phWide('Kathmandu Heritage Tour'),
+    images: SEED_PACKAGE_IMAGES['kathmandu-cultural-heritage'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['kathmandu-cultural-heritage'].featured,
     itinerary: [
       {
         day: 1,
@@ -309,8 +302,8 @@ export const mockPackages: Package[] = [
     location: 'Pokhara, Nepal',
     difficulty: 'Easy',
     groupSize: 10,
-    images: [phGallery('Pokhara lake'), phGallery('Wellness yoga')],
-    featuredImage: phWide('Pokhara Wellness Retreat'),
+    images: SEED_PACKAGE_IMAGES['pokhara-wellness-retreat'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['pokhara-wellness-retreat'].featured,
     itinerary: [
       {
         day: 1,
@@ -419,12 +412,8 @@ export const mockPackages: Package[] = [
     location: 'Annapurna & Mustang, Nepal',
     difficulty: 'Challenging',
     groupSize: 10,
-    images: [
-      phGallery('Annapurna Circuit'),
-      phGallery('Thorong La'),
-      phGallery('Manang village'),
-    ],
-    featuredImage: phWide('Annapurna Circuit Trek'),
+    images: SEED_PACKAGE_IMAGES['annapurna-circuit-trek'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['annapurna-circuit-trek'].featured,
     itinerary: [
       {
         day: 1,
@@ -532,8 +521,8 @@ export const mockPackages: Package[] = [
     location: 'Chitwan, Nepal',
     difficulty: 'Easy',
     groupSize: 12,
-    images: [phGallery('Chitwan jungle'), phGallery('Rhino Nepal')],
-    featuredImage: phWide('Chitwan Safari'),
+    images: SEED_PACKAGE_IMAGES['chitwan-jungle-safari'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['chitwan-jungle-safari'].featured,
     itinerary: [
       {
         day: 1,
@@ -616,8 +605,8 @@ export const mockPackages: Package[] = [
     location: 'Lumbini & Terai, Nepal',
     difficulty: 'Easy',
     groupSize: 15,
-    images: [phGallery('Lumbini garden'), phGallery('Maya Devi')],
-    featuredImage: phWide('Lumbini Pilgrimage'),
+    images: SEED_PACKAGE_IMAGES['lumbini-pilgrimage-tour'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['lumbini-pilgrimage-tour'].featured,
     itinerary: [
       {
         day: 1,
@@ -714,8 +703,8 @@ export const mockPackages: Package[] = [
     location: 'Langtang, Nepal',
     difficulty: 'Moderate',
     groupSize: 10,
-    images: [phGallery('Langtang valley'), phGallery('Kyanjin')],
-    featuredImage: phWide('Langtang Valley Trek'),
+    images: SEED_PACKAGE_IMAGES['langtang-valley-trek'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['langtang-valley-trek'].featured,
     itinerary: [
       { day: 1, title: 'Kathmandu', description: 'Permits & briefing.', activities: ['Briefing'], meals: ['D'], accommodation: 'Hotel' },
       { day: 2, title: 'Drive Syabrubesi', description: 'Rough but scenic road from Kathmandu.', activities: ['7–8h drive'], meals: ['B', 'L', 'D'], accommodation: 'Guesthouse' },
@@ -780,8 +769,8 @@ export const mockPackages: Package[] = [
     location: 'Nagarkot, Dhulikhel & Pokhara, Nepal',
     difficulty: 'Easy',
     groupSize: 12,
-    images: [phGallery('Nagarkot sunrise'), phGallery('Pokhara relax')],
-    featuredImage: phWide('Nagarkot Pokhara Relax'),
+    images: SEED_PACKAGE_IMAGES['nagarkot-pokhara-relaxation'].gallery,
+    featuredImage: SEED_PACKAGE_IMAGES['nagarkot-pokhara-relaxation'].featured,
     itinerary: [
       {
         day: 1,

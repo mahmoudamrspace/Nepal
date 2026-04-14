@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Review } from '@/types';
-import { getBlurDataURL } from '@/lib/imageUtils';
+import { getBlurDataURL, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface ReviewCardProps {
   review: Review;
@@ -59,15 +59,13 @@ export default function ReviewCard({ review, index = 0, disableAnimation = false
           className="flex items-center gap-2 px-3 py-1 rounded-full"
           style={{ backgroundColor: `${getPlatformColor(review.platform)}20` }}
         >
-          <Image
+          {/* Native img: TripAdvisor serves SVG; next/image often fails to optimize remote SVGs. */}
+          <img
             src={getPlatformLogo(review.platform)}
             alt={`${review.platform} logo`}
             width={review.platform === 'Google' ? 60 : 80}
-            height={review.platform === 'Google' ? 20 : 20}
-            className="object-contain"
-            sizes="(max-width: 768px) 60px, 80px"
-            placeholder="blur"
-            blurDataURL={getBlurDataURL()}
+            height={20}
+            className={`object-contain h-5 ${review.platform === 'Google' ? 'w-[60px]' : 'w-20'}`}
           />
         </div>
         {review.verified && (
@@ -116,6 +114,7 @@ export default function ReviewCard({ review, index = 0, disableAnimation = false
               sizes="40px"
               placeholder="blur"
               blurDataURL={getBlurDataURL()}
+              unoptimized={shouldBypassImageOptimizer(review.reviewerAvatar)}
             />
           ) : (
             <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">

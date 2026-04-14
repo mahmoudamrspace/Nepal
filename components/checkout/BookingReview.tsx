@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Package, Traveler } from '@/types';
 import { PaymentData } from '@/lib/validations';
 import { formatDate } from '@/lib/bookingUtils';
+import { shouldBypassImageOptimizer } from '@/lib/imageUtils';
 import Link from 'next/link';
 
 interface BookingReviewProps {
@@ -75,6 +76,7 @@ export default function BookingReview({
               fill
               className="object-cover"
               sizes="96px"
+              unoptimized={shouldBypassImageOptimizer(pkg.featuredImage)}
             />
           </div>
           <div className="flex-1">

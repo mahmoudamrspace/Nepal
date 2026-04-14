@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { getBlurDataURL, getImageSizes } from '@/lib/imageUtils';
+import { getBlurDataURL, getImageSizes, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 const instagramImages = [
   {
@@ -101,6 +101,7 @@ export default function Instagram() {
                   placeholder="blur"
                   blurDataURL={getBlurDataURL()}
                   loading="lazy"
+                  unoptimized={shouldBypassImageOptimizer(image.url)}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">

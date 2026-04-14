@@ -1,7 +1,7 @@
 import { BlogPost } from '@/types';
-import { phAvatar, phGallery, phWide } from '@/data/placeholderMedia';
+import { SEED_AVATARS, SEED_BLOG_IMAGES } from '@/data/seedMedia';
 
-/** Blog seed — replace placeholder images in admin after upload. */
+/** Blog seed — stock imagery via `seedMedia`; replace in admin after upload. */
 export const mockBlogPosts: BlogPost[] = [
   {
     id: '1',
@@ -24,11 +24,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Winter (December–February)</h2>
       <p>High passes may close with snow; Kathmandu, Pokhara, Chitwan, and low-altitude culture tours stay pleasant. High camps require warmer sleeping systems.</p>
     `,
-    featuredImage: phWide('Blog: Best time Nepal'),
-    images: [phGallery('Spring trek'), phGallery('Festival Nepal')],
+    featuredImage: SEED_BLOG_IMAGES['best-time-to-visit-nepal'].featured,
+    images: SEED_BLOG_IMAGES['best-time-to-visit-nepal'].gallery,
     author: {
       name: 'Sarah Johnson',
-      avatar: phAvatar('SJ'),
+      avatar: SEED_AVATARS.sarahJohnson,
       bio: 'Travel writer and Nepal enthusiast with over 10 years of experience exploring the Himalayas.',
     },
     category: 'Travel Tips',
@@ -59,11 +59,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Etiquette</h2>
       <p>Use <em>Namaste</em> with palms together; ask before photographing ceremonies; circle stupas clockwise.</p>
     `,
-    featuredImage: phWide('Blog: Nepali culture'),
-    images: [phGallery('Temple Nepal')],
+    featuredImage: SEED_BLOG_IMAGES['nepali-culture-and-traditions'].featured,
+    images: SEED_BLOG_IMAGES['nepali-culture-and-traditions'].gallery,
     author: {
       name: 'Rajesh Thapa',
-      avatar: phAvatar('RT'),
+      avatar: SEED_AVATARS.rajeshThapa,
       bio: 'Cultural historian and Nepal native passionate about sharing local traditions.',
     },
     category: 'Culture',
@@ -92,11 +92,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Altitude hygiene</h2>
       <p>Sleep low when possible, hydrate, avoid alcohol early on, and never mask AMS symptoms — guides are trained to descend if needed.</p>
     `,
-    featuredImage: phWide('Blog: EBC prep'),
-    images: [phGallery('Trek gear'), phGallery('Mountains')],
+    featuredImage: SEED_BLOG_IMAGES['everest-base-camp-preparation'].featured,
+    images: SEED_BLOG_IMAGES['everest-base-camp-preparation'].gallery,
     author: {
       name: 'Michael Chen',
-      avatar: phAvatar('MC'),
+      avatar: SEED_AVATARS.michaelChen,
       bio: 'Experienced mountaineer and trekking guide with 50+ successful EBC treks.',
     },
     category: 'Adventure',
@@ -124,11 +124,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Valley specialties</h2>
       <p>Newari <em>yomari</em>, <em>chatamari</em> rice crepes, and fiery <em>choila</em> buffalo pair with local aila spirit in Bhaktapur tasting menus.</p>
     `,
-    featuredImage: phWide('Blog: Nepali food'),
-    images: [phGallery('Dal bhat')],
+    featuredImage: SEED_BLOG_IMAGES['nepali-cuisine-guide'].featured,
+    images: SEED_BLOG_IMAGES['nepali-cuisine-guide'].gallery,
     author: {
       name: 'Priya Sharma',
-      avatar: phAvatar('PS'),
+      avatar: SEED_AVATARS.priyaSharma,
       bio: 'Food blogger and culinary enthusiast exploring Asian cuisines.',
     },
     category: 'Food',
@@ -154,11 +154,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Gateway treks</h2>
       <p>Ghorepani–Poon Hill, Mardi Himal, and ABC begin nearby; build buffer days for weather delays on mountain roads.</p>
     `,
-    featuredImage: phWide('Blog: Pokhara'),
-    images: [phGallery('Fewa lake')],
+    featuredImage: SEED_BLOG_IMAGES['pokhara-travel-guide'].featured,
+    images: SEED_BLOG_IMAGES['pokhara-travel-guide'].gallery,
     author: {
       name: 'Sarah Johnson',
-      avatar: phAvatar('SJ'),
+      avatar: SEED_AVATARS.sarahJohnson,
       bio: 'Travel writer and Nepal enthusiast with over 10 years of experience exploring the Himalayas.',
     },
     category: 'Travel Tips',
@@ -184,11 +184,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Responsible choices</h2>
       <p>Prioritize jeep, foot, and boat safaris with licensed naturalists; question any operator promising guaranteed cat sightings.</p>
     `,
-    featuredImage: phWide('Blog: Chitwan'),
-    images: [phGallery('Jungle safari')],
+    featuredImage: SEED_BLOG_IMAGES['wildlife-in-chitwan'].featured,
+    images: SEED_BLOG_IMAGES['wildlife-in-chitwan'].gallery,
     author: {
       name: 'David Wilson',
-      avatar: phAvatar('DW'),
+      avatar: SEED_AVATARS.davidWilson,
       bio: 'Wildlife photographer and conservation advocate.',
     },
     category: 'Adventure',
@@ -217,11 +217,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>2020s reforms</h2>
       <p>Rules evolve; a licensed agency keeps your group compliant if independent TIMS rules change mid-season.</p>
     `,
-    featuredImage: phWide('Blog: Permits Nepal'),
-    images: [],
+    featuredImage: SEED_BLOG_IMAGES['nepal-trekking-permits-explained'].featured,
+    images: SEED_BLOG_IMAGES['nepal-trekking-permits-explained'].gallery,
     author: {
       name: 'Michael Chen',
-      avatar: phAvatar('MC'),
+      avatar: SEED_AVATARS.michaelChen,
       bio: 'Experienced mountaineer and trekking guide with 50+ successful EBC treks.',
     },
     category: 'Travel Tips',
@@ -252,11 +252,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Community</h2>
       <p>Buy handicrafts direct from cooperatives, learn a few Nepali phrases, and respect photography boundaries in villages.</p>
     `,
-    featuredImage: phWide('Blog: Responsible travel'),
-    images: [phGallery('Mountain trail')],
+    featuredImage: SEED_BLOG_IMAGES['responsible-travel-nepal'].featured,
+    images: SEED_BLOG_IMAGES['responsible-travel-nepal'].gallery,
     author: {
       name: 'Anita Gurung',
-      avatar: phAvatar('AG'),
+      avatar: SEED_AVATARS.anitaGurung,
       bio: 'Sustainable tourism consultant based in Pokhara; former lodge operator on the ABC trail.',
     },
     category: 'Travel Tips',
@@ -282,11 +282,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Cultural notes</h2>
       <p>Tamang communities share Tibetan Buddhist rituals; cheese factories at Kyanjin offer fresh yak curd tastings.</p>
     `,
-    featuredImage: phWide('Blog: Langtang'),
-    images: [],
+    featuredImage: SEED_BLOG_IMAGES['langtang-valley-reborn'].featured,
+    images: SEED_BLOG_IMAGES['langtang-valley-reborn'].gallery,
     author: {
       name: 'Rajesh Thapa',
-      avatar: phAvatar('RT'),
+      avatar: SEED_AVATARS.rajeshThapa,
       bio: 'Cultural historian and Nepal native passionate about sharing local traditions.',
     },
     category: 'Adventure',
@@ -315,11 +315,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Vibe</h2>
       <p>EBC feels Sherpa-centric with iconic peak views; Annapurna shifts from subtropical gorges to Mustang-style dryness.</p>
     `,
-    featuredImage: phWide('Blog: Annapurna vs Everest'),
-    images: [],
+    featuredImage: SEED_BLOG_IMAGES['annapurna-or-everest-which-trek'].featured,
+    images: SEED_BLOG_IMAGES['annapurna-or-everest-which-trek'].gallery,
     author: {
       name: 'Sarah Johnson',
-      avatar: phAvatar('SJ'),
+      avatar: SEED_AVATARS.sarahJohnson,
       bio: 'Travel writer and Nepal enthusiast with over 10 years of experience exploring the Himalayas.',
     },
     category: 'Adventure',
@@ -345,11 +345,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Neighborhoods</h2>
       <p>Explore Patan alleys for family kitchens; Thamel has reliable late-night steamers — always ask for freshly made batches.</p>
     `,
-    featuredImage: phWide('Blog: Momos KTM'),
-    images: [],
+    featuredImage: SEED_BLOG_IMAGES['kathmandu-momo-map'].featured,
+    images: SEED_BLOG_IMAGES['kathmandu-momo-map'].gallery,
     author: {
       name: 'Priya Sharma',
-      avatar: phAvatar('PS'),
+      avatar: SEED_AVATARS.priyaSharma,
       bio: 'Food blogger and culinary enthusiast exploring Asian cuisines.',
     },
     category: 'Food',
@@ -375,11 +375,11 @@ export const mockBlogPosts: BlogPost[] = [
       <h2>Monastic architecture</h2>
       <p>Rent a bicycle to compare Thai, Chinese, and German monasteries — each compound reflects its sponsor nation’s style.</p>
     `,
-    featuredImage: phWide('Blog: Lumbini'),
-    images: [],
+    featuredImage: SEED_BLOG_IMAGES['lumbini-pilgrimage-first-timers'].featured,
+    images: SEED_BLOG_IMAGES['lumbini-pilgrimage-first-timers'].gallery,
     author: {
       name: 'David Wilson',
-      avatar: phAvatar('DW'),
+      avatar: SEED_AVATARS.davidWilson,
       bio: 'Wildlife photographer and conservation advocate.',
     },
     category: 'Culture',

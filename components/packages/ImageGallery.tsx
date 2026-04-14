@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getBlurDataURL, getImageSizes } from '@/lib/imageUtils';
+import { getBlurDataURL, getImageSizes, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface ImageGalleryProps {
   images: string[];
@@ -42,6 +42,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
             placeholder="blur"
             blurDataURL={getBlurDataURL()}
             priority
+            unoptimized={shouldBypassImageOptimizer(images[selectedImage])}
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
         </motion.div>
@@ -71,6 +72,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
                   sizes="(max-width: 768px) 25vw, 16vw"
                   placeholder="blur"
                   blurDataURL={getBlurDataURL()}
+                  unoptimized={shouldBypassImageOptimizer(image)}
                 />
               </motion.button>
             ))}
@@ -105,6 +107,7 @@ export default function ImageGallery({ images, title }: ImageGalleryProps) {
                   fill
                   className="object-contain rounded-lg"
                   sizes="(max-width: 1200px) 100vw, 1200px"
+                  unoptimized={shouldBypassImageOptimizer(images[selectedImage])}
                 />
               </div>
               <button

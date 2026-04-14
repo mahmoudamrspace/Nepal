@@ -3,6 +3,21 @@
  */
 
 /**
+ * `next/image` on Vercel often returns 400 INVALID_IMAGE_OPTIMIZE_REQUEST for
+ * placehold.co URLs (nested query strings, encoding, or upstream behavior).
+ * Bypass the optimizer so the browser loads the URL directly.
+ */
+export function shouldBypassImageOptimizer(src: string | undefined | null): boolean {
+  if (!src) return false;
+  try {
+    const host = new URL(src).hostname;
+    return host === 'placehold.co' || host.endsWith('.placehold.co');
+  } catch {
+    return src.includes('placehold.co');
+  }
+}
+
+/**
  * Generate a blur placeholder data URL
  * This is a tiny 1x1 pixel image that can be used as a placeholder
  */

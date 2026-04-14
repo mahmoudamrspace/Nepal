@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { getBlurDataURL } from '@/lib/imageUtils';
+import { getBlurDataURL, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface WhyNepalProps {
   title: string;
@@ -80,6 +80,7 @@ export default function WhyNepal({ title, content, highlights, image }: WhyNepal
               placeholder="blur"
               blurDataURL={getBlurDataURL()}
               loading="lazy"
+              unoptimized={shouldBypassImageOptimizer(image)}
             />
           </motion.div>
         </div>

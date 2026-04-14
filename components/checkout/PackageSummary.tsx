@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Package } from '@/types';
 import { calculateBookingTotal } from '@/lib/bookingUtils';
+import { shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface PackageSummaryProps {
   package: Package;
@@ -40,6 +41,7 @@ export default function PackageSummary({
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 400px"
+            unoptimized={shouldBypassImageOptimizer(pkg.featuredImage)}
           />
         </div>
         <h3 className="text-xl md:text-2xl font-serif font-bold text-gray-800 mb-2">

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Package } from '@/types';
-import { getBlurDataURL, getImageSizes } from '@/lib/imageUtils';
+import { getBlurDataURL, getImageSizes, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface PackageCardProps {
   package: Package;
@@ -37,6 +37,7 @@ export default function PackageCard({ package: pkg, index = 0 }: PackageCardProp
               placeholder="blur"
               blurDataURL={getBlurDataURL()}
               loading={index < 6 ? 'eager' : 'lazy'}
+              unoptimized={shouldBypassImageOptimizer(pkg.featuredImage)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </motion.div>

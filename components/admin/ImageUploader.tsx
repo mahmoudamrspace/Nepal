@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import type { StorageUploadModule } from '@/lib/storageUpload';
+import { shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface ImageUploaderProps {
   onImageSelect: (url: string) => void;
@@ -118,6 +119,7 @@ export default function ImageUploader({
                   alt={`Image ${index + 1}`}
                   fill
                   className="object-cover"
+                  unoptimized={shouldBypassImageOptimizer(url)}
                   sizes="(max-width: 768px) 50vw, 25vw"
                 />
               </div>

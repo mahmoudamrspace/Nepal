@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { BlogPost } from '@/types';
-import { getBlurDataURL, getImageSizes } from '@/lib/imageUtils';
+import { getBlurDataURL, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface ArticleHeaderProps {
   post: BlogPost;
@@ -26,6 +26,7 @@ export default function ArticleHeader({ post }: ArticleHeaderProps) {
           placeholder="blur"
           blurDataURL={getBlurDataURL()}
           priority
+          unoptimized={shouldBypassImageOptimizer(post.featuredImage)}
         />
         <div className="absolute inset-0 bg-[#485342]/80" />
       </div>
@@ -58,6 +59,7 @@ export default function ArticleHeader({ post }: ArticleHeaderProps) {
                   sizes="48px"
                   placeholder="blur"
                   blurDataURL={getBlurDataURL()}
+                  unoptimized={shouldBypassImageOptimizer(post.author.avatar)}
                 />
               )}
               <div>

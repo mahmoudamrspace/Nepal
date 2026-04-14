@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { getBlurDataURL } from '@/lib/imageUtils';
+import { getBlurDataURL, shouldBypassImageOptimizer } from '@/lib/imageUtils';
 
 interface CategoryHeroProps {
   title: string;
@@ -31,6 +31,7 @@ export default function CategoryHero({ title, subtitle, heroImage, ctaText = 'Ex
           sizes="100vw"
           placeholder="blur"
           blurDataURL={getBlurDataURL()}
+          unoptimized={shouldBypassImageOptimizer(heroImage)}
         />
         <div className="absolute inset-0 bg-black/50" />
       </motion.div>
